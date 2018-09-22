@@ -2,19 +2,17 @@ package com.jhmvin.places.service;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
-public class LocationPermissionService {
-
-    public static final int REQUEST_FINE_LOCATION = 100;
+public class FineLocationManager {
+    public final static int REQUEST_FINE_LOCATION = 100;
 
     private Activity activity;
 
-
-
-    public LocationPermissionService(Activity activity) {
+    public FineLocationManager(Activity activity) {
         this.activity = activity;
     }
 
@@ -31,6 +29,15 @@ public class LocationPermissionService {
     }
 
     /**
+     * Open Settings activity for location, this will easily allow user's to enable GPS.
+     */
+    public void openLocationSettings() {
+        Intent callGPSSettingIntent = new Intent(
+                android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+        this.activity.startActivity(callGPSSettingIntent);
+    }
+
+    /**
      * Is this the first time to ask permission.
      *
      * @return
@@ -40,11 +47,9 @@ public class LocationPermissionService {
                 Manifest.permission.ACCESS_FINE_LOCATION);
     }
 
-    public void requestForFineLocation(){
+    public void requestFineLocation() {
         ActivityCompat.requestPermissions(this.activity,
                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                LocationPermissionService.REQUEST_FINE_LOCATION);
+                FineLocationManager.REQUEST_FINE_LOCATION);
     }
-
-
 }
