@@ -9,7 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.jhmvin.places.appservice.LocationFService;
+import com.jhmvin.places.appservice.LocationUpdateFService;
 import com.jhmvin.places.service.FineLocationManager;
 
 public class Places extends AppCompatActivity {
@@ -64,8 +64,14 @@ public class Places extends AppCompatActivity {
 
     private void checkIfReady() {
         if (this.fineLocationManager.isFineLocationAllowed()) {
-            Intent intent = new Intent(this, LocationFService.class);
-            startService(intent);
+            Thread locationUpdateServiceThread = new Thread() {
+                @Override
+                public void run() {
+                    Intent intent = new Intent(getApplicationContext(), LocationUpdateFService.class);
+                    startService(intent);
+                }
+            };
+            locationUpdateServiceThread.start();
         }
     }
 

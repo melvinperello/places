@@ -79,16 +79,16 @@ public class FineLocationUpdateService {
          * method to specify the interval at which location is computed for your app.
          * method depends on the use case: for real time scenarios, set the value to few seconds; otherwise, limit to a few minutes (approximately two minutes or greater is recommended to minimize battery usage).
          */
-        locationRequest.setInterval(2 * 60 * 1000); // 2 minute
+        locationRequest.setInterval(15 * 1000); // 2 minute
         /**
          * to specify the interval at which location computed for other apps is delivered to your app.
          */
-        locationRequest.setFastestInterval(1 * 60 * 1000); // 1 minute
+        locationRequest.setFastestInterval(5 * 1000); // 1 minute
         /**
          * You can specify latency using the setMaxWaitTime() method, typically passing a value that is several times larger than the interval specified in the setInterval() method. This setting delays location delivery, and multiple location updates may be delivered in batches. These two changes help minimize battery consumption.
          * If your app doesn’t immediately need a location update, you should pass the largest possible value to the setMaxWaitTime() method, effectively trading latency for more data and battery efficiency.
          */
-        locationRequest.setMaxWaitTime(4 * 60 * 1000); // 4 minute
+        //locationRequest.setMaxWaitTime(4 * 60 * 1000); // 4 minute
 
         return locationRequest;
     }
