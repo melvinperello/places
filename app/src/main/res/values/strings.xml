@@ -6,4 +6,5 @@
     and requires that your GPS is enabled.
     </string>
     <string name="check_and_start">Start</string>
+    <string name="send_broadcast">Send Broadcast</string>
 </resources>
