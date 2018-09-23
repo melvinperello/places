@@ -17,18 +17,19 @@ public class PlacesTrackingService extends Service {
     //----------------------------------------------------------------------------------------------
     // Intent Filters.
     //----------------------------------------------------------------------------------------------
-    public final static String ASK_ALIVE = PlacesTrackService.class.getCanonicalName() + ".ASK_ALIVE";
-    public final static String REPLY_ALIVE = PlacesTrackService.class.getCanonicalName() + ".REPLY_ALIVE";
+    public final static String ASK_ALIVE = PlacesTrackingService.class.getCanonicalName() + ".ASK_ALIVE";
+    public final static String REPLY_ALIVE = PlacesTrackingService.class.getCanonicalName() + ".REPLY_ALIVE";
     /**
      * Instruct this service to shutdown.
      */
-    public final static String ACTION_STOP_SERVICE = PlacesTrackService.class.getCanonicalName() + ".ACTION_STOP_SERVICE";
+    public final static String ACTION_STOP_SERVICE = PlacesTrackingService.class.getCanonicalName() + ".ACTION_STOP_SERVICE";
 
     //----------------------------------------------------------------------------------------------
     // Service Variables.
     //----------------------------------------------------------------------------------------------
     private LocalBroadcastManager broadcastManager;
     private BroadcastReceiver placesTrackingServiceReceiver;
+    private LocationUpdateRequestService locationUpdateService;
 
     @Nullable
     @Override
@@ -69,6 +70,10 @@ public class PlacesTrackingService extends Service {
          * Creates the service listener.
          */
         this.placesTrackingServiceReceiver = new PlacesTrackingServiceListener();
+        /**
+         * Create Location Update Service.
+         */
+        this.locationUpdateService = new LocationUpdateRequestService(this);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -96,13 +101,11 @@ public class PlacesTrackingService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        /**
-         * Register Broadcast listener.
-         */
+        // register broadcast listener.
         this.registerPlacesTrackingServiceListener();
-        /**
-         * Show starting message.
-         */
+        // start service process.
+        this.startServiceProcess();
+        // notify service started.
         Toast.makeText(this, "PlacesTrackingService: STARTED", Toast.LENGTH_SHORT).show();
         /**
          * START_STICKY means "Hey Android! If you really really have to shut down my precious Service because of running low on memory, then please please try to start it again."
@@ -113,8 +116,14 @@ public class PlacesTrackingService extends Service {
     }
 
     private void registerPlacesTrackingServiceListener() {
-        this.broadcastManager.registerReceiver(this.placesTrackingServiceReceiver, new IntentFilter(ASK_ALIVE));
-        this.broadcastManager.registerReceiver(this.placesTrackingServiceReceiver, new IntentFilter(ACTION_STOP_SERVICE));
+        IntentFilter actionFilters = new IntentFilter();
+        actionFilters.addAction(ASK_ALIVE);
+        actionFilters.addAction(ACTION_STOP_SERVICE);
+        this.broadcastManager.registerReceiver(this.placesTrackingServiceReceiver, actionFilters);
+    }
+
+    private void startServiceProcess() {
+        this.locationUpdateService.startLocationRequest();
     }
 
     //----------------------------------------------------------------------------------------------
@@ -128,6 +137,8 @@ public class PlacesTrackingService extends Service {
          * Unregister  Broadcast Listener when destroyed.
          */
         this.unregisterPlacesTrackingServiceListener();
+        //
+        this.stopLocationRequests();
         /**
          * Some Destroy Message.
          */
@@ -138,10 +149,15 @@ public class PlacesTrackingService extends Service {
         this.broadcastManager.unregisterReceiver(this.placesTrackingServiceReceiver);
     }
 
+    private void stopLocationRequests() {
+        this.locationUpdateService.stopLocationRequest();
+    }
+
 
     //----------------------------------------------------------------------------------------------
     // Service Methods.
     //----------------------------------------------------------------------------------------------
+
 
     /**
      * Sends a alive broadcast message with the

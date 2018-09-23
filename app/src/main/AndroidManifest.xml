@@ -13,7 +13,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <service android:name="com.jhmvin.places.service.PlacesTrackService"></service>
         <service android:name="com.jhmvin.places.service.PlacesTrackingService"></service>
 
         <activity android:name=".Places">

@@ -26,11 +26,6 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     /**
-     * Custom Toast
-     * https://github.com/Shashank02051997/FancyToast-Android
-     */
-
-    /**
      * Google Fused Location API.
      */
     implementation "com.google.android.gms:play-services-location:15.0.1"

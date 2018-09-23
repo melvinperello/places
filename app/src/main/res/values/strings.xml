@@ -2,8 +2,7 @@
     <string name="app_name">Places</string>
 
     <string name="introduction">
-        Welcome to Places! This application will record your Location data,
-    and requires that your GPS is enabled.
+        Welcome To Places ! Catching Moments . . .
     </string>
     <string name="check_gps">Check GPS</string>
     <string name="check_service">Check Service</string>
