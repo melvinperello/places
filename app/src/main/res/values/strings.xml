@@ -5,6 +5,8 @@
         Welcome to Places! This application will record your Location data,
     and requires that your GPS is enabled.
     </string>
-    <string name="check_and_start">Start</string>
-    <string name="send_broadcast">Send Broadcast</string>
+    <string name="check_gps">Check GPS</string>
+    <string name="check_service">Check Service</string>
+    <string name="start_service">Start Service</string>
+    <string name="stop_service">Stop Service</string>
 </resources>

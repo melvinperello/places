@@ -13,14 +13,17 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.jhmvin.places.service.PlacesTrackService;
 import com.jhmvin.places.service.FineLocationManager;
+import com.jhmvin.places.service.PlacesTrackService;
+import com.jhmvin.places.service.PlacesTrackingService;
 
 public class Places extends AppCompatActivity {
     private FineLocationManager fineLocationManager;
 
     private Button btnCheckGPS;
-    private Button btnBroadcast;
+    private Button btnCheckService;
+    private Button btnStartService;
+    private Button btnStopService;
 
     private LocationServiceReceiver mReceiver = new LocationServiceReceiver();
     private LocalBroadcastManager manager;
@@ -36,12 +39,25 @@ public class Places extends AppCompatActivity {
         }
 
         this.manager = LocalBroadcastManager.getInstance(getApplicationContext());
-        manager.registerReceiver(this.mReceiver, new IntentFilter(PlacesTrackService.ACTION_PONG));
+        manager.registerReceiver(this.mReceiver, new IntentFilter(PlacesTrackingService.REPLY_ALIVE));
+        /**
+         * Create Buttons.
+         */
+        this.btnCheckGPS = (Button) this.findViewById(R.id.btnCheckGPS);
+        this.btnCheckService = (Button) this.findViewById(R.id.btnCheckService);
+        this.btnStartService = (Button) this.findViewById(R.id.btnStartService);
+        this.btnStopService = (Button) this.findViewById(R.id.btnStopService);
 
-        this.btnCheckGPS = (Button) this.findViewById(R.id.btnStart);
+
         this.btnCheckGPS.setOnClickListener(new ClickCheckGPS());
-        this.btnBroadcast = (Button) this.findViewById(R.id.btnBroadcast);
-        this.btnBroadcast.setOnClickListener(new ClickBroadcast());
+        this.btnCheckService.setOnClickListener(new ClickBroadcast());
+
+        this.btnStopService.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                manager.sendBroadcast(new Intent(PlacesTrackingService.ACTION_STOP_SERVICE));
+            }
+        });
 
     }
 
@@ -52,9 +68,28 @@ public class Places extends AppCompatActivity {
         super.onStart();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        /**
+         *
+         */
+        manager.registerReceiver(this.mReceiver, new IntentFilter(PlacesTrackingService.REPLY_ALIVE));
+        /**
+         *
+         */
+        this.sendMessage();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(this.mReceiver);
+    }
+
     private void sendMessage() {
         // the service will respond to this broadcast only if it's running
-        manager.sendBroadcast(new Intent(PlacesTrackService.ACTION_PING));
+        manager.sendBroadcast(new Intent(PlacesTrackingService.ASK_ALIVE));
     }
 
 
@@ -98,7 +133,7 @@ public class Places extends AppCompatActivity {
             Thread locationUpdateServiceThread = new Thread() {
                 @Override
                 public void run() {
-                    Intent intent = new Intent(getApplicationContext(), PlacesTrackService.class);
+                    Intent intent = new Intent(getApplicationContext(), PlacesTrackingService.class);
                     startService(intent);
                 }
             };
@@ -115,8 +150,9 @@ public class Places extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             // here you receive the response from the service
-            if (intent.getAction().equals(PlacesTrackService.ACTION_PONG)) {
+            if (intent.getAction().equals(PlacesTrackingService.REPLY_ALIVE)) {
                 checkService();
+                btnStartService.setEnabled(false);
             }
         }
     }
