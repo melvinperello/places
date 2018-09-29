@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.v4.app.ActivityCompat;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
@@ -16,18 +17,21 @@ import com.google.android.gms.location.LocationServices;
  */
 public class FusedLocationInquirer extends AbstractLocationInquirer {
 
-    private final FusedLocationCallbck fusedLocationCallbck = new FusedLocationCallbck();
+    private FusedLocationCallbck fusedLocationCallbck;
+    private FusedLocationProviderClient googleFusedLocationClient;
 
     public FusedLocationInquirer(Context base) {
         super(base);
+
+
     }
 
 
     private LocationRequest getLocationRequest() {
         return LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(6000)
-                .setFastestInterval(4000);
+                .setInterval(5000)
+                .setFastestInterval(3000);
     }
 
 
@@ -44,15 +48,40 @@ public class FusedLocationInquirer extends AbstractLocationInquirer {
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        LocationServices.getFusedLocationProviderClient(this.context)
+
+        // make sure that the previous call has stopped if there is any.
+        this.stop();
+
+        // re-create the service.
+        this.fusedLocationCallbck = new FusedLocationCallbck();
+        this.googleFusedLocationClient = LocationServices.getFusedLocationProviderClient(this.context);
+
+        // start callback.
+        this.googleFusedLocationClient
                 .requestLocationUpdates(this.getLocationRequest(),
                         this.fusedLocationCallbck, null);
     }
 
+    /**
+     * Ensures that the Fused Location API has shutdown properly.
+     */
     @Override
     public void stop() {
-        LocationServices.getFusedLocationProviderClient(this.context)
+        // check if null.
+        if (this.googleFusedLocationClient == null) {
+            return;
+        }
+        // check if has callback
+        if (this.fusedLocationCallbck == null) {
+            return;
+        }
+
+        // remove callback
+        this.googleFusedLocationClient
                 .removeLocationUpdates(this.fusedLocationCallbck);
+        // set to null.
+        this.googleFusedLocationClient = null;
+        this.fusedLocationCallbck = null;
     }
 
     private class FusedLocationCallbck extends LocationCallback {

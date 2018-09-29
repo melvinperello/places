@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.jhmvin.places">
 
-
+    <!-- Dangerous Permission -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
@@ -12,16 +13,41 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-        <service android:name="com.jhmvin.places.service.PlacesTrackingService"></service>
+        android:theme="@style/AppTheme"
+        tools:replace="android:icon">
 
-        <activity android:name=".Places">
+        <!--
+            Sugar ORM Meta Data.
+            tool:replace is also conflict for Sugar ORM
+            the added scheme of tools in the manifest tag is required to use tools.
+        -->
+        <meta-data
+            android:name="DATABASE"
+            android:value="com_jhmvin_places.db" />
+        <meta-data
+            android:name="VERSION"
+            android:value="2" />
+        <meta-data
+            android:name="QUERY_LOG"
+            android:value="true" />
+        <meta-data
+            android:name="DOMAIN_PACKAGE_NAME"
+            android:value="com.jhmvin.places" />
+
+        <!-- Service -->
+        <service android:name=".service.PlacesMainService" />
+
+        <!-- Activity -->
+        <activity android:name=".Home">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".Places" />
+        <activity android:name=".StartTracking" />
+        <activity android:name=".TrackingLocation"></activity>
     </application>
 
 </manifest>

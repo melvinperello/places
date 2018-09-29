@@ -1,11 +1,13 @@
 <resources>
     <string name="app_name">Places</string>
+    <string name="start_tracking">Start Tracking</string>
+    <string name="mark_location">Mark Location</string>
+    <string name="stop_tracking">Stop Tracking</string>
 
-    <string name="introduction">
-        Welcome To Places ! Catching Moments . . .
-    </string>
-    <string name="check_gps">Check GPS</string>
-    <string name="check_service">Check Service</string>
-    <string name="start_service">Start Service</string>
-    <string name="stop_service">Stop Service</string>
+    <string name="track_your_moments">Track your moments</string>
+    <string name="latitude">Latitude</string>
+    <string name="longitude">Longitude</string>
+    <string name="location_name">Location Name</string>
+    <string name="destination">Destination</string>
+string>
 </resources>
