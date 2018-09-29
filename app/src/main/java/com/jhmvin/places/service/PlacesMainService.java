@@ -2,6 +2,7 @@ package com.jhmvin.places.service;
 
 import android.app.Service;
 import android.content.Intent;
+import android.databinding.ObservableArrayList;
 import android.location.Location;
 import android.os.Binder;
 import android.os.IBinder;
@@ -10,8 +11,16 @@ import android.widget.Toast;
 
 import com.jhmvin.places.feature.location.AbstractLocationInquirer;
 import com.jhmvin.places.feature.location.FusedLocationInquirer;
+import com.jhmvin.places.persistence.LocationPOJO;
 import com.sdsmdg.tastytoast.TastyToast;
 
+/**
+ * Application Main Service.
+ * <p>
+ * Serves as a Interface for multiple service.
+ * <p>
+ * 1. Location Service.
+ */
 public class PlacesMainService extends Service {
 
 
@@ -45,12 +54,14 @@ public class PlacesMainService extends Service {
     private AbstractLocationInquirer locationInquirer;
     private final OnLocationReceived onLocationReceived = new OnLocationReceived();
     private boolean requestingLocations = false;
+    private ObservableArrayList<LocationPOJO> locationList;
 
     private class OnLocationReceived implements AbstractLocationInquirer.OnLocationUpdated {
 
         @Override
         public void onLocationUpdated(Location location) {
-
+            LocationPOJO locationPOJO = new LocationPOJO(location);
+            locationList.add(locationPOJO);
         }
     }
 
@@ -81,13 +92,22 @@ public class PlacesMainService extends Service {
     }
 
     public void startRequestingLocations() {
+        locationList = new ObservableArrayList<>();
         this.locationInquirer.start();
         this.requestingLocations = true;
+    }
+
+    public ObservableArrayList<LocationPOJO> getLocationList() {
+        return locationList;
     }
 
     public void stopRequestingLocations() {
         this.locationInquirer.stop();
         this.requestingLocations = false;
+        if (locationList != null) {
+            locationList.clear();
+            locationList = null;
+        }
     }
 
     public boolean isRequestingLocations() {

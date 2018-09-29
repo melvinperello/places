@@ -5,9 +5,8 @@
     <string name="stop_tracking">Stop Tracking</string>
 
     <string name="track_your_moments">Track your moments</string>
-    <string name="latitude">Latitude</string>
-    <string name="longitude">Longitude</string>
-    <string name="location_name">Location Name</string>
-    <string name="destination">Destination</string>
-string>
+    <string name="from">From</string>
+    <string name="to">To</string>
+
+
 </resources>

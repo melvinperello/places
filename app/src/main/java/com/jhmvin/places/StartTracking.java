@@ -5,8 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.EditText;
 
-import com.jhmvin.places.service.PlacesMainService;
-import com.sdsmdg.tastytoast.TastyToast;
+import com.jhmvin.places.util.ToastInterface;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -17,14 +16,11 @@ public class StartTracking extends AppCompatActivity {
     //----------------------------------------------------------------------------------------------
     // Widget Variables.
     //----------------------------------------------------------------------------------------------
-    @BindView(R.id.edtStartLat)
-    EditText edtStartLat;
+    @BindView(R.id.edtTrackFrom)
+    EditText edtTrackFrom;
 
-    @BindView(R.id.edtStartLong)
-    EditText edtStartLong;
-
-    @BindView(R.id.edtStartLocName)
-    EditText edtStartLocName;
+    @BindView(R.id.edtTrackTo)
+    EditText edtTrackTo;
 
 
     //----------------------------------------------------------------------------------------------
@@ -38,12 +34,28 @@ public class StartTracking extends AppCompatActivity {
         ButterKnife.bind(this);
     }
 
-    @OnClick(R.id.btnStart)
+    private String getEditText(EditText editText) {
+        return editText.getText().toString().trim();
+    }
+
+
+    private boolean checkIfSomethingEmpty() {
+        return (this.getEditText(this.edtTrackFrom).isEmpty() ||
+                this.getEditText(this.edtTrackTo).isEmpty());
+    }
+
+
+    @OnClick(R.id.btnStartTracking)
     public void onClickButtonStart() {
-        Intent startPlacesMainService = new Intent(this, PlacesMainService.class);
-        startPlacesMainService.setAction(PlacesMainService.START_LOCATION_SERVICE);
-        startService(startPlacesMainService);
-        TastyToast.makeText(getApplicationContext(), "Welcome to places.", TastyToast.LENGTH_LONG, TastyToast.SUCCESS);
+        if (this.checkIfSomethingEmpty()) {
+            ToastInterface.show(this, "Location Names are required.", ToastInterface.UNKNOWN);
+            return;
+        }
+
+        Intent startTracker = new Intent(this,TrackingLocation.class);
+        startActivity(startTracker);
+        this.finish();
+
     }
 
 

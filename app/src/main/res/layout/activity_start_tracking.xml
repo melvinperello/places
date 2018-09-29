@@ -13,35 +13,27 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="10dp"
-        android:text="@string/destination"
+        android:text="New Track"
         android:textSize="20sp" />
 
     <EditText
-        android:id="@+id/edtStartLocName"
+        android:id="@+id/edtTrackFrom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="@string/location_name"
-        android:inputType="textPersonName" />
+        android:hint="@string/from"
+        android:inputType="text" />
 
     <EditText
-        android:id="@+id/edtStartLat"
+        android:id="@+id/edtTrackTo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="@string/latitude"
-        android:inputType="numberDecimal" />
-
-    <EditText
-        android:id="@+id/edtStartLong"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="@string/longitude"
-        android:inputType="numberDecimal" />
+        android:hint="@string/to"
+        android:inputType="text" />
 
     <Button
-        android:id="@+id/btnStart"
+        android:id="@+id/btnStartTracking"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"

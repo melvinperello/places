@@ -29,7 +29,7 @@ public class Home extends AppCompatActivity {
             TastyToast.makeText(getApplicationContext(), "Service Connected", TastyToast.LENGTH_LONG, TastyToast.INFO);
 
 
-            skip();
+//            skip();
         }
 
         @Override
