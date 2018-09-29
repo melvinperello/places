@@ -47,7 +47,8 @@
         </activity>
         <activity android:name=".Places" />
         <activity android:name=".StartTracking" />
-        <activity android:name=".TrackingLocation"></activity>
+        <activity android:name=".TrackingLocation" />
+        <activity android:name=".MainActivity"></activity>
     </application>
 
 </manifest>
