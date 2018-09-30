@@ -38,17 +38,17 @@
         <service android:name=".service.PlacesMainService" />
 
         <!-- Activity -->
-        <activity android:name=".Home">
+        <activity android:name=".Home"></activity>
+        <activity android:name=".Places" />
+        <activity android:name=".StartTracking" />
+        <activity android:name=".TrackingLocation" />
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Places" />
-        <activity android:name=".StartTracking" />
-        <activity android:name=".TrackingLocation" />
-        <activity android:name=".MainActivity"></activity>
     </application>
 
 </manifest>

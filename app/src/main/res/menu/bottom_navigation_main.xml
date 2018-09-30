@@ -6,17 +6,17 @@
         android:enabled="true"
         android:icon="@drawable/ic_location_on_black_24dp"
         android:title="@string/app_name"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/action_schedules"
         android:enabled="true"
         android:icon="@drawable/ic_location_on_black_24dp"
         android:title="@string/app_name"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/action_music"
         android:enabled="true"
         android:icon="@drawable/ic_location_on_black_24dp"
         android:title="@string/app_name"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
 </menu>

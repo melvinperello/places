@@ -1,12 +1,22 @@
 apply plugin: 'com.android.application'
 
 configurations.all {
-    resolutionStrategy {
-        // 2018/09/29 "com.google.android.gms:play-services-location:15.0.1"
-        // is using the following libraries below with lower versions forcing to use latest
-        force 'com.android.support:support-media-compat:28.0.0-rc02'
-        force 'com.android.support:support-v4:28.0.0-rc02'
-    }
+//    resolutionStrategy {
+//        // 2018/09/29 "com.google.android.gms:play-services-location:15.0.1"
+//        // is using the following libraries below with lower versions forcing to use latest
+//        force 'com.android.support:support-media-compat:28.0.0-rc02'
+//        force 'com.android.support:support-v4:28.0.0-rc02'
+//        force "com.android.support:design:28.0.0-rc02"
+//        // bottom navigation
+//    }
+//    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+//        def requested = details.requested
+//        if (requested.group == "com.android.support") {
+//            if (!requested.name.startsWith("multidex")) {
+//                details.useVersion "28.0.0-rc02"
+//            }
+//        }
+//    }
 }
 
 android {
@@ -39,30 +49,23 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
-    /**
-     * Bottom Navigation Bar.
-     */
+    // 2018/09/29 "com.google.android.gms:play-services-location:15.0.1"
+    // is using the following libraries below with lower versions forcing to use latest
+    implementation('com.android.support:support-media-compat:28.0.0-rc02') { force = true }
+    implementation('com.android.support:support-v4:28.0.0-rc02') { force = true }
+    // bottom navigation
     implementation "com.android.support:design:28.0.0-rc02"
-
-    /**
-     * Google Fused Location API.
-     */
+    // Google Fused Location
     implementation "com.google.android.gms:play-services-location:15.0.1"
-
-    /**
-     * Sugar ORM.
-     */
+    // Sugar ORM
     implementation 'com.github.satyan:sugar:1.3'
-    /**
-     * ButterKnife
-     */
+    // Butter Knife
     implementation 'com.jakewharton:butterknife:8.8.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
-
-    /**
-     * Tasty Toast.
-     * https://github.com/yadav-rahul/TastyToast
-     */
+    // Tasty Toast.
+    // https://github.com/yadav-rahul/TastyToast
     implementation 'com.sdsmdg.tastytoast:tastytoast:0.1.1'
+    // https://github.com/aurelhubert/ahbottomnavigation (bottom navigation)
+    implementation 'com.aurelhubert:ahbottomnavigation:2.1.0'
 
 }
