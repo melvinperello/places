@@ -37,7 +37,7 @@ android {
         }
     }
     dataBinding {
-        enabled = true
+        enabled = false
     }
 }
 
@@ -67,5 +67,7 @@ dependencies {
     implementation 'com.sdsmdg.tastytoast:tastytoast:0.1.1'
     // https://github.com/aurelhubert/ahbottomnavigation (bottom navigation)
     implementation 'com.aurelhubert:ahbottomnavigation:2.1.0'
+    // https://github.com/greenrobot/EventBus
+    implementation 'org.greenrobot:eventbus:3.1.1'
 
 }

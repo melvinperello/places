@@ -13,6 +13,9 @@ import butterknife.OnClick;
 
 public class PlacesNew extends AppCompatActivity {
 
+    public static final String EXTRA_PLACE_ORIGIN = "EXTRA_PLACE_ORIGIN";
+    public static final String EXTRA_PLACE_DESTINATION = "EXTRA_PLACE_DESTINATION";
+
 
     @BindView(R.id.edtCurrentPlace)
     EditText edtCurrentPlace;
@@ -44,7 +47,11 @@ public class PlacesNew extends AppCompatActivity {
 
         String displayString = String.format("Your Travelling from [%s] to [%s].", currentPlace, destinationPlace);
 
-        this.startActivity(new Intent(this, PlacesTravelling.class));
+        Intent intent = new Intent(this, PlacesTravelling.class);
+        intent.putExtra(EXTRA_PLACE_ORIGIN, currentPlace);
+        intent.putExtra(EXTRA_PLACE_DESTINATION, destinationPlace);
+
+        this.startActivity(intent);
     }
 
     @OnClick(R.id.btnCancelTravel)

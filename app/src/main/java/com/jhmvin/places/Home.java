@@ -79,8 +79,6 @@ public class Home extends AppCompatActivity {
         Intent startPlacesMainService = new Intent(this, PlacesMainService.class);
         this.startService(startPlacesMainService);
         this.bindService(startPlacesMainService, mConnection, Context.BIND_AUTO_CREATE);
-
-
     }
 
     @Override

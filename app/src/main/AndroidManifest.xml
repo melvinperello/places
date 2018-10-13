@@ -36,6 +36,7 @@
 
         <!-- Service -->
         <service android:name=".service.PlacesMainService" />
+        <service android:name=".service.PlacesTravelService" />
 
         <!-- Activity -->
         <activity android:name=".Home" />

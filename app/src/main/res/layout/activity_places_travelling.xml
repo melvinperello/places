@@ -29,6 +29,7 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/tvOrigin"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="5"
@@ -49,6 +50,7 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/tvDestination"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="5"
@@ -68,6 +70,7 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/tvTravelStart"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="5"
@@ -87,6 +90,7 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/tvTimeElapse"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="5"
@@ -115,6 +119,7 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/tvLongitude"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="5"
@@ -134,6 +139,7 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/tvLatitude"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="5"
@@ -153,6 +159,7 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/tvSpeed"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="5"
@@ -172,6 +179,7 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/tvLastTime"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="5"
@@ -192,6 +200,7 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/tvLocationCount"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="5"
