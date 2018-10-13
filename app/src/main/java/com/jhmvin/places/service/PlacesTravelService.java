@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 
@@ -56,7 +57,14 @@ public class PlacesTravelService extends Service {
                     locMessage.setLatitude(location.getLatitude());
                     locMessage.setSpeed(location.getSpeed());
                     locMessage.setAccuracy(location.getAccuracy());
-                    locMessage.setTime(location.getElapsedRealtimeNanos());
+
+                    long bootTime = (System.currentTimeMillis() - SystemClock.elapsedRealtime());
+                    long locTime = location.getElapsedRealtimeNanos() / 1000000;
+                    long timeRecordedMills = bootTime + locTime;
+
+
+                    locMessage.setTime(timeRecordedMills);
+
 
                     EventBus.getDefault().post(locMessage);
                 }
