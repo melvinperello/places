@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_vertical"
+    android:orientation="vertical"
+    tools:context=".PlacesNew">
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Where are you now ?"
+        android:textSize="24sp" />
+
+    <EditText
+        android:id="@+id/edtCurrentPlace"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Current Place"
+        android:inputType="textPersonName" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="20dp"
+        android:text="Where are you going ?"
+        android:textSize="24sp" />
+
+    <EditText
+        android:id="@+id/edtDestinationPlace"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Destination Place"
+        android:inputType="textPersonName" />
+
+    <Button
+        android:id="@+id/btnStartJourney"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Start Travel" />
+
+    <Button
+        android:id="@+id/btnCancelTravel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Cancel Travel" />
+</LinearLayout>

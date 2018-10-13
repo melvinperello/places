@@ -4,24 +4,27 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".Places"
-    tools:layout_editor_absoluteY="81dp">
+    android:gravity="center"
+    tools:context=".Places">
 
-    <Button
-        android:id="@+id/btnStartTracking"
+
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/start_tracking" />
+        android:text="Places Prototype"
+        android:paddingBottom="20dp"
+        android:textAlignment="center"
+        android:textSize="24sp" />
 
     <Button
-        android:id="@+id/btnStopTracking"
+        android:id="@+id/btnNewPlace"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/stop_tracking" />
+        android:text="New Place" />
 
     <Button
-        android:id="@+id/btnMarkLocation"
+        android:id="@+id/btnViewPlaces"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/mark_location" />
+        android:text="View Places" />
 </LinearLayout>

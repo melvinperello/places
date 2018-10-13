@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.EditText;
 
-import com.jhmvin.places.util.ToastInterface;
+import com.jhmvin.places.util.ToastAdapter;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -48,7 +48,7 @@ public class StartTracking extends AppCompatActivity {
     @OnClick(R.id.btnStartTracking)
     public void onClickButtonStart() {
         if (this.checkIfSomethingEmpty()) {
-            ToastInterface.show(this, "Location Names are required.", ToastInterface.UNKNOWN);
+            ToastAdapter.show(this, "Location Names are required.", ToastAdapter.UNKNOWN);
             return;
         }
 

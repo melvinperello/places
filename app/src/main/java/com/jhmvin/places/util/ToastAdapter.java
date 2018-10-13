@@ -7,7 +7,10 @@ import com.sdsmdg.tastytoast.TastyToast;
 /**
  * Toast Interface.
  */
-public class ToastInterface {
+public class ToastAdapter {
+    //----------------------------------------------------------------------------------------------
+    // Toast Types.
+    //----------------------------------------------------------------------------------------------
     public final static int DEFAULT = TastyToast.DEFAULT;
     public final static int SUCCESS = TastyToast.SUCCESS;
     public final static int WARNING = TastyToast.WARNING;
@@ -15,10 +18,21 @@ public class ToastInterface {
     public final static int INFO = TastyToast.INFO;
     public final static int UNKNOWN = TastyToast.CONFUSING;
 
+    //----------------------------------------------------------------------------------------------
+    // Toast Length.
+    //----------------------------------------------------------------------------------------------
     public final static int LENGTH_SHORT = TastyToast.LENGTH_SHORT;
     public final static int LENGTH_LONG = TastyToast.LENGTH_LONG;
 
 
+    /**
+     * Show a toast.
+     *
+     * @param context application context.
+     * @param text    content text.
+     * @param type    content type.
+     * @param length  display duration.
+     */
     public static void show(Context context, String text, int type, int length) {
         TastyToast.makeText(context, text, length, type);
     }
