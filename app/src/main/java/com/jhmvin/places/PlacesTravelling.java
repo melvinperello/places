@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
+import com.jhmvin.places.domain.message.CheckItineraryMessage;
+import com.jhmvin.places.domain.message.LocationReceivedMessage;
 import com.jhmvin.places.service.PlacesTravelService;
 import com.jhmvin.places.util.ToastAdapter;
 
@@ -39,11 +41,11 @@ public class PlacesTravelling extends AppCompatActivity {
     @BindView(R.id.tvSpeed)
     TextView tvSpeed;
 
+    @BindView(R.id.tvAccuracy)
+    TextView tvAccuracy;
+
     @BindView(R.id.tvLastTime)
     TextView tvLastTime;
-
-    @BindView(R.id.tvLocationCount)
-    TextView tvLocationCount;
 
 
     @Override
@@ -54,6 +56,8 @@ public class PlacesTravelling extends AppCompatActivity {
 
         Intent startTravelService = new Intent(this, PlacesTravelService.class);
         startTravelService.setAction(PlacesTravelService.ACTION_START_TRAVEL);
+        startTravelService.putExtra(PlacesNew.EXTRA_PLACE_ORIGIN, getIntent().getExtras().getString(PlacesNew.EXTRA_PLACE_ORIGIN));
+        startTravelService.putExtra(PlacesNew.EXTRA_PLACE_DESTINATION, getIntent().getExtras().getString(PlacesNew.EXTRA_PLACE_DESTINATION));
         startService(startTravelService);
 
     }
@@ -81,7 +85,11 @@ public class PlacesTravelling extends AppCompatActivity {
         super.onResume();
         EventBus.getDefault().register(this);
 
+        Intent startTravelService = new Intent(this, PlacesTravelService.class);
+        startTravelService.setAction(PlacesTravelService.ACTION_CHECK_ITINERARY);
+        startService(startTravelService);
     }
+
 
     @Override
     protected void onPause() {
@@ -91,13 +99,20 @@ public class PlacesTravelling extends AppCompatActivity {
 
     // UI Updates must be on the Main Thread.
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onLocationUpdated(PlacesTravelService.LocationUpdated locationUpdated) {
-        tvLastTime.setText(locationUpdated.getLastUpdate());
+    public void onLocationUpdated(LocationReceivedMessage locationReceivedMessage) {
+        tvLongitude.setText(String.valueOf(locationReceivedMessage.getLongitude()));
+        tvLatitude.setText(String.valueOf(locationReceivedMessage.getLatitude()));
+        tvSpeed.setText(String.valueOf(locationReceivedMessage.getSpeed()));
+        tvAccuracy.setText(String.valueOf(locationReceivedMessage.getAccuracy()));
+        tvLastTime.setText(String.valueOf(locationReceivedMessage.getTime()));
     }
 
-    // UI Updates must be on the Main Thread.
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onSomething(String string) {
-        ToastAdapter.show(this, "I received: " + string);
+    public void onItineraryCheck(CheckItineraryMessage itinerary) {
+        tvOrigin.setText(String.valueOf(itinerary.getOrigin()));
+        tvDestination.setText(String.valueOf(itinerary.getDestination()));
+        tvTravelStart.setText(String.valueOf(itinerary.getStarted()));
     }
+
+
 }

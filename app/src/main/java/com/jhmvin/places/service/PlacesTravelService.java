@@ -14,6 +14,9 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.jhmvin.places.PlacesNew;
+import com.jhmvin.places.domain.message.CheckItineraryMessage;
+import com.jhmvin.places.domain.message.LocationReceivedMessage;
 import com.jhmvin.places.util.ToastAdapter;
 
 import org.greenrobot.eventbus.EventBus;
@@ -27,6 +30,7 @@ public class PlacesTravelService extends Service {
 
     public final static String ACTION_START_TRAVEL = PlacesTravelService.class.getCanonicalName() + ".ACTION_START_TRAVEL";
     public final static String ACTION_STOP_TRAVEL = PlacesTravelService.class.getCanonicalName() + ".ACTION_STOP_TRAVEL";
+    public final static String ACTION_CHECK_ITINERARY = PlacesTravelService.class.getCanonicalName() + ".ACTION_CHECK_ITINERARY";
 
 
     @Nullable
@@ -39,18 +43,6 @@ public class PlacesTravelService extends Service {
     private FusedLocationProviderClient mGoogleFusedLocationClient;
     private List<Location> mReceivedLocations;
 
-    public static class LocationUpdated {
-        private String lastUpdate;
-
-        public String getLastUpdate() {
-            return lastUpdate;
-        }
-
-        public void setLastUpdate(String lastUpdate) {
-            this.lastUpdate = lastUpdate;
-        }
-    }
-
 
     private final LocationCallback mLocationCallback = new LocationCallback() {
         @Override
@@ -58,13 +50,15 @@ public class PlacesTravelService extends Service {
             if (mReceivedLocations != null) {
                 for (Location location : locationResult.getLocations()) {
                     mReceivedLocations.add(location);
-                    String lastUpdate = new SimpleDateFormat("hh:mm:ss a").format(new Date());
-//                    ToastAdapter.show(getApplicationContext(), "Location Was Received [" + mReceivedLocations.size() + "]: " + lastUpdate);
-                    // send event
-                    LocationUpdated update = new LocationUpdated();
-                    update.setLastUpdate(lastUpdate);
-                    EventBus.getDefault().post(update);
-                    EventBus.getDefault().post(String.valueOf(location.getLongitude()));
+
+                    LocationReceivedMessage locMessage = new LocationReceivedMessage();
+                    locMessage.setLongitude(location.getLongitude());
+                    locMessage.setLatitude(location.getLatitude());
+                    locMessage.setSpeed(location.getSpeed());
+                    locMessage.setAccuracy(location.getAccuracy());
+                    locMessage.setTime(location.getElapsedRealtimeNanos());
+
+                    EventBus.getDefault().post(locMessage);
                 }
             }
         }
@@ -82,6 +76,11 @@ public class PlacesTravelService extends Service {
         ToastAdapter.show(getApplicationContext(), "Service Was Created: " + new SimpleDateFormat("hh:mm:ss a").format(new Date()));
     }
 
+
+    private String mOrigin;
+    private String mDestination;
+    private long mStarted = 0;
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
@@ -89,16 +88,21 @@ public class PlacesTravelService extends Service {
                 if (intent.getAction().equals(ACTION_START_TRAVEL)) {
                     if (this.mGoogleFusedLocationClient == null) {
                         this.createFusedLocationClient();
-                    } else {
-                        // already started
+                        mOrigin = intent.getExtras().getString(PlacesNew.EXTRA_PLACE_ORIGIN);
+                        mDestination = intent.getExtras().getString(PlacesNew.EXTRA_PLACE_DESTINATION);
+                        mStarted = System.currentTimeMillis();
                     }
                 } else if (intent.getAction().equals(ACTION_STOP_TRAVEL)) {
                     if (this.mGoogleFusedLocationClient != null) {
                         this.stopFusedLocationClient();
                         this.stopSelf();
-                    } else {
-                        // already destroyed
                     }
+                } else if (intent.getAction().equals(ACTION_CHECK_ITINERARY)) {
+                    CheckItineraryMessage itinerary = new CheckItineraryMessage();
+                    itinerary.setOrigin(this.mOrigin);
+                    itinerary.setDestination(mDestination);
+                    itinerary.setStarted(mStarted);
+                    EventBus.getDefault().post(itinerary);
                 }
             }
         }

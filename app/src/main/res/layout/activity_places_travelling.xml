@@ -12,7 +12,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Itenerary"
+        android:text="Itinerary"
         android:textSize="18sp"
         android:textStyle="bold" />
 
@@ -98,10 +98,10 @@
     </LinearLayout>
 
     <TextView
-        android:paddingTop="20dp"
         android:id="@+id/textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingTop="20dp"
         android:text="Current Location"
         android:textSize="18sp"
         android:textStyle="bold" />
@@ -175,6 +175,27 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
+            android:text="Accuracy"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvAccuracy"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:text="82.23%" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingBottom="20dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
             android:text="Time"
             android:textStyle="bold" />
 
@@ -186,26 +207,6 @@
             android:text="04:28:23 PM - 2018.10.13" />
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="20dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:text="Count"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tvLocationCount"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="5"
-            android:text="200 Location/s Recorded" />
-    </LinearLayout>
 
     <Button
         android:id="@+id/btnAddPoint"

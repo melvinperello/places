@@ -50,8 +50,8 @@ public class PlacesNew extends AppCompatActivity {
         Intent intent = new Intent(this, PlacesTravelling.class);
         intent.putExtra(EXTRA_PLACE_ORIGIN, currentPlace);
         intent.putExtra(EXTRA_PLACE_DESTINATION, destinationPlace);
-
         this.startActivity(intent);
+        this.finish();
     }
 
     @OnClick(R.id.btnCancelTravel)
