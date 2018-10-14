@@ -156,7 +156,7 @@ public class PlacesTravelling extends AppCompatActivity {
         tvLongitude.setText(String.valueOf(locationReceivedMessage.getLongitude()));
         tvLatitude.setText(String.valueOf(locationReceivedMessage.getLatitude()));
         tvSpeed.setText(decimalFormat.format(speed) + " m/s");
-        tvAccuracy.setText(decimalFormat.format(accuracy) + " %");
+        tvAccuracy.setText(decimalFormat.format(accuracy) + " Radial Meter");
 
         Calendar lastUpdate = Calendar.getInstance();
         lastUpdate.setTimeInMillis(locationReceivedMessage.getTime());

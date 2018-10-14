@@ -2,11 +2,11 @@ package com.jhmvin.places;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 
+import com.jhmvin.places.domain.TravelStreamListData;
+import com.jhmvin.places.domain.TravelStreamListDataAdapter;
 import com.jhmvin.places.util.TempTravelStream;
 import com.jhmvin.places.util.ToastAdapter;
 
@@ -15,11 +15,29 @@ import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
-public class PlacesView extends AppCompatActivity {
+public class PlacesView extends AppCompatActivity implements TravelStreamListDataAdapter.ItemClicked {
 
-    @BindView(R.id.lvFiles)
-    ListView lvFiles;
+
+    @BindView(R.id.rvFiles)
+    RecyclerView rvFiles;
+
+
+    private final ArrayList<TravelStreamListData> dataList = new ArrayList<>();
+    RecyclerView.Adapter adapter;
+
+
+    @OnClick(R.id.btnAdd)
+    public void onClickBtnAdd() {
+        TravelStreamListData data = new TravelStreamListData();
+        data.setOrigin("New");
+        data.setDestination("Object");
+        data.setStartTime("Added");
+        this.dataList.add(data);
+        this.adapter.notifyDataSetChanged();
+        ToastAdapter.show(getApplicationContext(), "Mock object added !.", ToastAdapter.SUCCESS);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,23 +45,27 @@ public class PlacesView extends AppCompatActivity {
         setContentView(R.layout.activity_places_view);
         ButterKnife.bind(this);
 
-        ArrayList<String> filesToDisplay = new ArrayList<>();
+        rvFiles.setHasFixedSize(true);
+        LinearLayoutManager manager = new LinearLayoutManager(this);
+        rvFiles.setLayoutManager(manager);
+
+        this.adapter = new TravelStreamListDataAdapter(this, dataList);
+        this.rvFiles.setAdapter(adapter);
+
         for (File f : TempTravelStream.getTempTravelStreamDirectory(getApplicationContext()).listFiles()) {
-            filesToDisplay.add(f.getName());
+            TravelStreamListData data = new TravelStreamListData();
+            data.setOrigin("Home");
+            data.setDestination("Clark");
+            data.setStartTime(String.valueOf(f.getName()));
+            this.dataList.add(data);
+            this.adapter.notifyDataSetChanged();
         }
-
-        final ArrayAdapter<String> adapter = new ArrayAdapter(this,
-                android.R.layout.simple_list_item_1, filesToDisplay);
-
-        lvFiles.setAdapter(adapter);
-        lvFiles.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                ToastAdapter.show(getApplicationContext(), String.valueOf(position));
-            }
-        });
 
 
     }
 
+    @Override
+    public void onItemClicked(int index) {
+        ToastAdapter.show(getApplicationContext(), String.valueOf(index));
+    }
 }

@@ -43,16 +43,21 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    // Support 28.0.0-rc02
     implementation 'com.android.support:appcompat-v7:28.0.0-rc02'
+    //
+    implementation('com.android.support:support-media-compat:28.0.0-rc02') { force = true }
+    implementation('com.android.support:support-v4:28.0.0-rc02') { force = true }
+    // recycler
+    implementation 'com.android.support:recyclerview-v7:28.0.0-rc02'
+    // card view
+    implementation 'com.android.support:cardview-v7:28.0.0-rc02'
+    //
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
-    // 2018/09/29 "com.google.android.gms:play-services-location:15.0.1"
-    // is using the following libraries below with lower versions forcing to use latest
-    implementation('com.android.support:support-media-compat:28.0.0-rc02') { force = true }
-    implementation('com.android.support:support-v4:28.0.0-rc02') { force = true }
     // bottom navigation
     implementation "com.android.support:design:28.0.0-rc02"
     // Google Fused Location
