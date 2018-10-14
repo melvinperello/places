@@ -48,6 +48,7 @@ public class PlacesNew extends AppCompatActivity {
         String displayString = String.format("Your Travelling from [%s] to [%s].", currentPlace, destinationPlace);
 
         Intent intent = new Intent(this, PlacesTravelling.class);
+        intent.setAction(PlacesTravelling.ACTION_START_UPDATES);
         intent.putExtra(EXTRA_PLACE_ORIGIN, currentPlace);
         intent.putExtra(EXTRA_PLACE_DESTINATION, destinationPlace);
         this.startActivity(intent);

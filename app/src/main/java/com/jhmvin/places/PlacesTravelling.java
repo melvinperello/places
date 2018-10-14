@@ -6,7 +6,7 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
-import com.jhmvin.places.domain.message.CheckItineraryMessage;
+import com.jhmvin.places.domain.message.ActionTravelCheckMessage;
 import com.jhmvin.places.domain.message.LocationReceivedMessage;
 import com.jhmvin.places.service.PlacesTravelService;
 import com.jhmvin.places.util.ToastAdapter;
@@ -15,6 +15,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -24,6 +25,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class PlacesTravelling extends AppCompatActivity {
+    public final static String CANONICAL_NAME = PlacesTravelling.class.getCanonicalName();
+    public final static String ACTION_START_UPDATES = CANONICAL_NAME + ".ACTION_START_UPDATES";
 
     @BindView(R.id.tvOrigin)
     TextView tvOrigin;
@@ -52,20 +55,31 @@ public class PlacesTravelling extends AppCompatActivity {
     @BindView(R.id.tvLastTime)
     TextView tvLastTime;
 
+    // Elapsed time counter.
+    private Handler mElapsedTimeHandler;
+    private Runnable mElapsedTimeHandlerCallback;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_places_travelling);
+        // hide action bar
+        getSupportActionBar().hide();
+        // bind
         ButterKnife.bind(this);
+        // clear fields
         this.clearTextViews();
 
-        Intent startTravelService = new Intent(this, PlacesTravelService.class);
-        startTravelService.setAction(PlacesTravelService.ACTION_START_TRAVEL);
-        startTravelService.putExtra(PlacesNew.EXTRA_PLACE_ORIGIN, getIntent().getExtras().getString(PlacesNew.EXTRA_PLACE_ORIGIN));
-        startTravelService.putExtra(PlacesNew.EXTRA_PLACE_DESTINATION, getIntent().getExtras().getString(PlacesNew.EXTRA_PLACE_DESTINATION));
-        startService(startTravelService);
-
+        if (getIntent().getAction() != null) {
+            if (getIntent().getAction().equals(ACTION_START_UPDATES)) {
+                Intent startTravelService = new Intent(this, PlacesTravelService.class);
+                startTravelService.setAction(PlacesTravelService.ACTION_TRAVEL_START);
+                startTravelService.putExtra(PlacesNew.EXTRA_PLACE_ORIGIN, getIntent().getExtras().getString(PlacesNew.EXTRA_PLACE_ORIGIN));
+                startTravelService.putExtra(PlacesNew.EXTRA_PLACE_DESTINATION, getIntent().getExtras().getString(PlacesNew.EXTRA_PLACE_DESTINATION));
+                startService(startTravelService);
+            }
+        }
     }
 
     private void clearTextViews() {
@@ -90,10 +104,15 @@ public class PlacesTravelling extends AppCompatActivity {
         ToastAdapter.show(this, "View was clicked.");
     }
 
+    @OnClick(R.id.btnViewGraph)
+    public void onClickBtnViewGraph() {
+        ToastAdapter.show(this, "Not Yet Supported.", ToastAdapter.ERROR);
+    }
+
     @OnClick(R.id.btnStopTravel)
     public void onClickBtnStopTravel() {
         Intent startTravelService = new Intent(this, PlacesTravelService.class);
-        startTravelService.setAction(PlacesTravelService.ACTION_STOP_TRAVEL);
+        startTravelService.setAction(PlacesTravelService.ACTION_TRAVEL_STOP);
         startService(startTravelService);
         this.finish();
     }
@@ -104,7 +123,7 @@ public class PlacesTravelling extends AppCompatActivity {
         EventBus.getDefault().register(this);
 
         Intent startTravelService = new Intent(this, PlacesTravelService.class);
-        startTravelService.setAction(PlacesTravelService.ACTION_CHECK_ITINERARY);
+        startTravelService.setAction(PlacesTravelService.ACTION_TRAVEL_CHECK);
         startService(startTravelService);
     }
 
@@ -113,18 +132,31 @@ public class PlacesTravelling extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         EventBus.getDefault().unregister(this);
-        someHandler.removeCallbacks(someHandlerCallback);
-        someHandlerCallback = null;
-        someHandler = null;
+        // stop elapsed time counter
+        this.stopElapsedTimeUpdateHandler();
     }
 
     // UI Updates must be on the Main Thread.
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onLocationUpdated(LocationReceivedMessage locationReceivedMessage) {
+        this.updateLocationUI(locationReceivedMessage);
+    }
+
+    // UI Updates must be on the Main Thread.
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onTravelCheckReceived(ActionTravelCheckMessage itinerary) {
+        this.updateItineraryUI(itinerary);
+    }
+
+    private void updateLocationUI(LocationReceivedMessage locationReceivedMessage) {
+        DecimalFormat decimalFormat = new DecimalFormat("#,##0.00");
+        double speed = (double) locationReceivedMessage.getSpeed();
+        double accuracy = (double) locationReceivedMessage.getAccuracy();
+
         tvLongitude.setText(String.valueOf(locationReceivedMessage.getLongitude()));
         tvLatitude.setText(String.valueOf(locationReceivedMessage.getLatitude()));
-        tvSpeed.setText(String.valueOf(locationReceivedMessage.getSpeed()));
-        tvAccuracy.setText(String.valueOf(locationReceivedMessage.getAccuracy()));
+        tvSpeed.setText(decimalFormat.format(speed) + " m/s");
+        tvAccuracy.setText(decimalFormat.format(accuracy) + " %");
 
         Calendar lastUpdate = Calendar.getInstance();
         lastUpdate.setTimeInMillis(locationReceivedMessage.getTime());
@@ -133,50 +165,59 @@ public class PlacesTravelling extends AppCompatActivity {
         tvLastTime.setText(new SimpleDateFormat("hh:mm:ss a").format(lastUpdate.getTime()));
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onItineraryCheck(CheckItineraryMessage itinerary) {
+
+    private void updateItineraryUI(ActionTravelCheckMessage itinerary) {
         tvOrigin.setText(String.valueOf(itinerary.getOrigin()));
         tvDestination.setText(String.valueOf(itinerary.getDestination()));
 
         Calendar lastUpdate = Calendar.getInstance();
-        lastUpdate.setTimeInMillis(itinerary.getStarted());
+        lastUpdate.setTimeInMillis(itinerary.getStartedTime());
         lastUpdate.setTimeZone(TimeZone.getDefault());
 
-        tvTravelStart.setText(new SimpleDateFormat("hh:mm:ss a").format(lastUpdate.getTime()));
-        updateTimeElapseTextView(itinerary.getStarted());
+        tvTravelStart.setText(new SimpleDateFormat("hh:mm:ss a - yyyy.MM.dd").format(lastUpdate.getTime()));
+        startElapsedTimeUpdateHandler(itinerary.getStartedTime());
     }
 
-    private Handler someHandler;
-    private Runnable someHandlerCallback;
 
-    private void updateTimeElapseTextView(final long startedMills) {
-        someHandler = new Handler(getMainLooper());
-        someHandlerCallback = new Runnable() {
+    private void startElapsedTimeUpdateHandler(final long startedMills) {
+        mElapsedTimeHandler = new Handler(getMainLooper());
+        mElapsedTimeHandlerCallback = new Runnable() {
             @Override
             public void run() {
-                long elapseTime = System.currentTimeMillis() - startedMills;
-                long seconds = elapseTime / 1000;
-
-                long hours = seconds / 3600;
-                long minutes = (seconds / 60) % 60;
-                long sec = seconds % 60;
-                String time = sec + " sec";
-                if (minutes != 0) {
-                    time = minutes + " min " + time;
-                }
-
-                if (hours != 0) {
-                    time = hours + " hr " + time;
-                }
-
-                tvTimeElapse.setText(time);
-                someHandler.postDelayed(this, 1000);
+                tvTimeElapse.setText(getElapsedTimeString(startedMills));
+                mElapsedTimeHandler.postDelayed(this, 1000);
             }
         };
 
-        someHandler.postDelayed(someHandlerCallback, 1000);
+        mElapsedTimeHandler.postDelayed(mElapsedTimeHandlerCallback, 1000);
+    }
 
+    private void stopElapsedTimeUpdateHandler() {
+        if (mElapsedTimeHandler != null) {
+            mElapsedTimeHandler.removeCallbacks(mElapsedTimeHandlerCallback);
+            mElapsedTimeHandlerCallback = null;
+            mElapsedTimeHandler = null;
+        }
 
+    }
+
+    private String getElapsedTimeString(long startedMills) {
+        String time = "";
+        long elapseTime = System.currentTimeMillis() - startedMills;
+        long seconds = elapseTime / 1000;
+
+        long hours = seconds / 3600;
+        long minutes = (seconds / 60) % 60;
+        long sec = seconds % 60;
+        time = sec + " sec";
+        if (minutes != 0) {
+            time = minutes + " min " + time;
+        }
+
+        if (hours != 0) {
+            time = hours + " hr " + time;
+        }
+        return time;
     }
 
 

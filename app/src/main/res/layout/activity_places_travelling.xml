@@ -4,9 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
-    android:paddingTop="10dp"
+    android:layout_margin="20dp"
     tools:context=".PlacesTravelling">
 
     <TextView
@@ -66,7 +64,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
-            android:text="Travel Started"
+            android:text="Started"
             android:textStyle="bold" />
 
         <TextView
@@ -219,6 +217,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="View Drop Off Points" />
+
+    <Button
+        android:id="@+id/btnViewGraph"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="View in Graph" />
 
     <Button
         android:id="@+id/btnStopTravel"

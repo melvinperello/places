@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-import com.jhmvin.places.domain.message.CheckItineraryMessage;
+import com.jhmvin.places.domain.message.ActionTravelCheckMessage;
 import com.jhmvin.places.service.PlacesTravelService;
 import com.jhmvin.places.util.ToastAdapter;
 
@@ -24,7 +24,7 @@ public class Places extends AppCompatActivity {
         ButterKnife.bind(this);
 
         Intent startTravelService = new Intent(this, PlacesTravelService.class);
-        startTravelService.setAction(PlacesTravelService.ACTION_CHECK_ITINERARY);
+        startTravelService.setAction(PlacesTravelService.ACTION_TRAVEL_CHECK);
         startService(startTravelService);
     }
 
@@ -40,14 +40,16 @@ public class Places extends AppCompatActivity {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onItineraryCheck(CheckItineraryMessage itinerary) {
-        if (itinerary.getStarted() != 0) {
-            Intent intent = new Intent(this, PlacesTravelling.class);
-            intent.putExtra(PlacesNew.EXTRA_PLACE_ORIGIN, itinerary.getOrigin());
-            intent.putExtra(PlacesNew.EXTRA_PLACE_DESTINATION, itinerary.getDestination());
-            this.startActivity(intent);
-            this.finish();
+    public void onItineraryCheck(ActionTravelCheckMessage itinerary) {
+        if (itinerary.isStarted()) {
+            this.proceedToPlacesTravelling();
         }
+    }
+
+    private void proceedToPlacesTravelling() {
+        Intent intent = new Intent(this, PlacesTravelling.class);
+        this.startActivity(intent);
+        this.finish();
     }
 
     @Override

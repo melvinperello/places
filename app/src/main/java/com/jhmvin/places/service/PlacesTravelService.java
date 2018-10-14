@@ -16,7 +16,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.jhmvin.places.PlacesNew;
-import com.jhmvin.places.domain.message.CheckItineraryMessage;
+import com.jhmvin.places.domain.message.ActionTravelCheckMessage;
 import com.jhmvin.places.domain.message.LocationReceivedMessage;
 import com.jhmvin.places.util.ToastAdapter;
 
@@ -24,14 +24,19 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class PlacesTravelService extends Service {
+    private final static String CANONICAL_NAME = PlacesTravelService.class.getCanonicalName();
+    public final static String ACTION_TRAVEL_START = CANONICAL_NAME + ".ACTION_TRAVEL_START";
+    public final static String ACTION_TRAVEL_STOP = CANONICAL_NAME + ".ACTION_TRAVEL_STOP";
+    public final static String ACTION_TRAVEL_CHECK = CANONICAL_NAME + ".ACTION_TRAVEL_CHECK";
 
-    public final static String ACTION_START_TRAVEL = PlacesTravelService.class.getCanonicalName() + ".ACTION_START_TRAVEL";
-    public final static String ACTION_STOP_TRAVEL = PlacesTravelService.class.getCanonicalName() + ".ACTION_STOP_TRAVEL";
-    public final static String ACTION_CHECK_ITINERARY = PlacesTravelService.class.getCanonicalName() + ".ACTION_CHECK_ITINERARY";
+    //
+    public final static String ACTION_GET_POINTS = CANONICAL_NAME + ".ACTION_GET_POINTS";
 
 
     @Nullable
@@ -40,10 +45,104 @@ public class PlacesTravelService extends Service {
         return null;
     }
 
-
+    // location
     private FusedLocationProviderClient mGoogleFusedLocationClient;
     private List<Location> mReceivedLocations;
+    // commands
+    private final Map<String, IntentRunnableCommand> mIntentCommand = new HashMap<>();
 
+    // Travel Check Variables.
+    private String mCheckOrigin;
+    private String mCheckDestination;
+    private long mCheckStartTime;
+    private boolean mCheckStarted;
+
+    public PlacesTravelService() {
+        this.initCommands();
+        this.unsetCheckIndicators();
+    }
+
+    private void setCheckIndicators(Intent intent) {
+        mCheckOrigin = intent.getExtras().getString(PlacesNew.EXTRA_PLACE_ORIGIN);
+        mCheckDestination = intent.getExtras().getString(PlacesNew.EXTRA_PLACE_DESTINATION);
+        mCheckStartTime = System.currentTimeMillis();
+        mCheckStarted = true;
+    }
+
+    private void unsetCheckIndicators() {
+        mCheckOrigin = null;
+        mCheckDestination = null;
+        mCheckStartTime = 0;
+        mCheckStarted = false;
+    }
+
+    private class ActionTravelStartCommand implements IntentRunnableCommand {
+
+        @Override
+        public void run(Intent intent, int flags, int startId) {
+            if (!mCheckStarted) { // if not started
+                setCheckIndicators(intent); // started will be true
+                createFusedLocationClient();
+            }
+            ToastAdapter.show(getApplicationContext(), "Travel Start Command", ToastAdapter.SUCCESS);
+        }
+    }
+
+    private class ActionTravelStopCommand implements IntentRunnableCommand {
+
+        @Override
+        public void run(Intent intent, int flags, int startId) {
+            if (mGoogleFusedLocationClient != null) {
+                stopFusedLocationClient();
+            }
+            unsetCheckIndicators(); // trash check vars
+            ToastAdapter.show(getApplicationContext(), "Travel Stop Command", ToastAdapter.ERROR);
+        }
+    }
+
+    private class ActionTravelCheck implements IntentRunnableCommand {
+
+        @Override
+        public void run(Intent intent, int flags, int startId) {
+            ActionTravelCheckMessage check = new ActionTravelCheckMessage();
+            check.setOrigin(mCheckOrigin);
+            check.setDestination(mCheckDestination);
+            check.setStartedTime(mCheckStartTime);
+            check.setStarted(mCheckStarted);
+            EventBus.getDefault().post(check);
+        }
+    }
+
+
+    private void initCommands() {
+        mIntentCommand.put(ACTION_TRAVEL_START, new ActionTravelStartCommand());
+        mIntentCommand.put(ACTION_TRAVEL_STOP, new ActionTravelStopCommand());
+        mIntentCommand.put(ACTION_TRAVEL_CHECK, new ActionTravelCheck());
+
+        //
+
+        mIntentCommand.put(ACTION_GET_POINTS, new IntentRunnableCommand() {
+            @Override
+            public void run(Intent intent, int flags, int startId) {
+                if (mReceivedLocations != null) {
+                    EventBus.getDefault().post(mReceivedLocations);
+                }
+            }
+        });
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null) {
+            if (intent.getAction() != null) {
+                IntentRunnableCommand command = mIntentCommand.get(intent.getAction());
+                if (command != null) {
+                    command.run(intent, flags, startId);
+                }
+            }
+        }
+        return START_STICKY;
+    }
 
     private final LocationCallback mLocationCallback = new LocationCallback() {
         @Override
@@ -85,38 +184,9 @@ public class PlacesTravelService extends Service {
     }
 
 
-    private String mOrigin;
-    private String mDestination;
-    private long mStarted = 0;
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null) {
-            if (intent.getAction() != null) {
-                if (intent.getAction().equals(ACTION_START_TRAVEL)) {
-                    if (this.mGoogleFusedLocationClient == null) {
-                        this.createFusedLocationClient();
-                        mOrigin = intent.getExtras().getString(PlacesNew.EXTRA_PLACE_ORIGIN);
-                        mDestination = intent.getExtras().getString(PlacesNew.EXTRA_PLACE_DESTINATION);
-                        mStarted = System.currentTimeMillis();
-                    }
-                } else if (intent.getAction().equals(ACTION_STOP_TRAVEL)) {
-                    if (this.mGoogleFusedLocationClient != null) {
-                        this.stopFusedLocationClient();
-                        this.stopSelf();
-                    }
-                } else if (intent.getAction().equals(ACTION_CHECK_ITINERARY)) {
-                    CheckItineraryMessage itinerary = new CheckItineraryMessage();
-                    itinerary.setOrigin(this.mOrigin);
-                    itinerary.setDestination(mDestination);
-                    itinerary.setStarted(mStarted);
-                    EventBus.getDefault().post(itinerary);
-                }
-            }
-        }
-        return START_STICKY;
-    }
-
+    /**
+     * Starts the location request.
+     */
     private void createFusedLocationClient() {
         this.mReceivedLocations = new LinkedList<>();
         this.mGoogleFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -139,6 +209,9 @@ public class PlacesTravelService extends Service {
         );
     }
 
+    /**
+     * Stop the location request.
+     */
     private void stopFusedLocationClient() {
         this.mGoogleFusedLocationClient.removeLocationUpdates(this.mLocationCallback);
         if (this.mReceivedLocations != null) {

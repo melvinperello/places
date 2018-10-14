@@ -51,7 +51,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".PlacesNew" />
-        <activity android:name=".PlacesTravelling"></activity>
+        <activity android:name=".PlacesTravelling" />
     </application>
 
 </manifest>
