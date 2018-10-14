@@ -6,7 +6,6 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.jhmvin.places.domain.message.ActionTravelCheckMessage;
 import com.jhmvin.places.service.PlacesTravelService;
-import com.jhmvin.places.util.ToastAdapter;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -36,7 +35,8 @@ public class Places extends AppCompatActivity {
 
     @OnClick(R.id.btnViewPlaces)
     public void onClickBtnViewPlaces() {
-        ToastAdapter.show(this, "View Places Was Clicked");
+        Intent intent = new Intent(this, PlacesView.class);
+        startActivity(intent);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

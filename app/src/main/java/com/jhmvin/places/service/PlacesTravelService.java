@@ -18,10 +18,12 @@ import com.google.android.gms.location.LocationServices;
 import com.jhmvin.places.PlacesNew;
 import com.jhmvin.places.domain.message.ActionTravelCheckMessage;
 import com.jhmvin.places.domain.message.LocationReceivedMessage;
+import com.jhmvin.places.util.TempTravelStream;
 import com.jhmvin.places.util.ToastAdapter;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -83,6 +85,14 @@ public class PlacesTravelService extends Service {
             if (!mCheckStarted) { // if not started
                 setCheckIndicators(intent); // started will be true
                 createFusedLocationClient();
+                TempTravelStream travelStream = new TempTravelStream(getApplicationContext());
+                try {
+                    travelStream.start("Somewher", "there", System.currentTimeMillis());
+                } catch (IOException ex) {
+                    ToastAdapter.show(getApplicationContext(), ex.getMessage(), ToastAdapter.ERROR);
+                } finally {
+                    travelStream.close();
+                }
             }
             ToastAdapter.show(getApplicationContext(), "Travel Start Command", ToastAdapter.SUCCESS);
         }

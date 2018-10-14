@@ -52,6 +52,8 @@
         </activity>
         <activity android:name=".PlacesNew" />
         <activity android:name=".PlacesTravelling" />
+        <activity android:name=".PlacesView" />
+        <activity android:name=".PlacesViewStream"></activity>
     </application>
 
 </manifest>
