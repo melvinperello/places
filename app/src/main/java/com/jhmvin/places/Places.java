@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-import com.jhmvin.places.domain.message.ActionTravelCheckMessage;
+import com.jhmvin.places.feature.location.LocationInfoToken;
 import com.jhmvin.places.service.PlacesMainService;
 
 import org.greenrobot.eventbus.EventBus;
@@ -40,7 +40,7 @@ public class Places extends AppCompatActivity {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onItineraryCheck(ActionTravelCheckMessage itinerary) {
+    public void onItineraryCheck(LocationInfoToken itinerary) {
         if (itinerary.isStarted()) {
             this.proceedToPlacesTravelling();
         }

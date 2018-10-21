@@ -6,8 +6,8 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
-import com.jhmvin.places.domain.message.ActionTravelCheckMessage;
-import com.jhmvin.places.domain.message.LocationReceivedMessage;
+import com.jhmvin.places.feature.location.LocationInfoToken;
+import com.jhmvin.places.feature.location.LocationUpdateMessage;
 import com.jhmvin.places.service.PlacesMainService;
 import com.jhmvin.places.util.ToastAdapter;
 
@@ -75,8 +75,8 @@ public class PlacesTravelling extends AppCompatActivity {
             if (getIntent().getAction().equals(ACTION_START_UPDATES)) {
                 Intent startTravelService = new Intent(this, PlacesMainService.class);
                 startTravelService.setAction(PlacesMainService.ACTION_TRAVEL_START);
-                startTravelService.putExtra(PlacesNew.EXTRA_PLACE_ORIGIN, getIntent().getExtras().getString(PlacesNew.EXTRA_PLACE_ORIGIN));
-                startTravelService.putExtra(PlacesNew.EXTRA_PLACE_DESTINATION, getIntent().getExtras().getString(PlacesNew.EXTRA_PLACE_DESTINATION));
+                startTravelService.putExtra(PlacesNew.EXTRA_PLACE_START, getIntent().getExtras().getString(PlacesNew.EXTRA_PLACE_START));
+                startTravelService.putExtra(PlacesNew.EXTRA_PLACE_END, getIntent().getExtras().getString(PlacesNew.EXTRA_PLACE_END));
                 startService(startTravelService);
             }
         }
@@ -114,6 +114,10 @@ public class PlacesTravelling extends AppCompatActivity {
         Intent startTravelService = new Intent(this, PlacesMainService.class);
         startTravelService.setAction(PlacesMainService.ACTION_TRAVEL_STOP);
         startService(startTravelService);
+        // start home
+        Intent intent = new Intent(this, Places.class);
+        startActivity(intent);
+        // end this
         this.finish();
     }
 
@@ -138,24 +142,27 @@ public class PlacesTravelling extends AppCompatActivity {
 
     // UI Updates must be on the Main Thread.
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onLocationUpdated(LocationReceivedMessage locationReceivedMessage) {
+    public void onLocationUpdated(LocationUpdateMessage locationReceivedMessage) {
         this.updateLocationUI(locationReceivedMessage);
     }
 
     // UI Updates must be on the Main Thread.
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onTravelCheckReceived(ActionTravelCheckMessage itinerary) {
+    public void onTravelCheckReceived(LocationInfoToken itinerary) {
         this.updateItineraryUI(itinerary);
     }
 
-    private void updateLocationUI(LocationReceivedMessage locationReceivedMessage) {
+    private void updateLocationUI(LocationUpdateMessage locationReceivedMessage) {
         DecimalFormat decimalFormat = new DecimalFormat("#,##0.00");
         double speed = (double) locationReceivedMessage.getSpeed();
         double accuracy = (double) locationReceivedMessage.getAccuracy();
 
         tvLongitude.setText(String.valueOf(locationReceivedMessage.getLongitude()));
         tvLatitude.setText(String.valueOf(locationReceivedMessage.getLatitude()));
-        tvSpeed.setText(decimalFormat.format(speed) + " m/s");
+        double speedHour = speed * 60 * 60;
+        double speedKm = speedHour / 1000;
+        String speedKmString = decimalFormat.format(speedKm) + " km/h";
+        tvSpeed.setText(decimalFormat.format(speed) + " m/s" + " -- " + speedKmString);
         tvAccuracy.setText(decimalFormat.format(accuracy) + " Radial Meter");
 
         Calendar lastUpdate = Calendar.getInstance();
@@ -166,16 +173,16 @@ public class PlacesTravelling extends AppCompatActivity {
     }
 
 
-    private void updateItineraryUI(ActionTravelCheckMessage itinerary) {
-        tvOrigin.setText(String.valueOf(itinerary.getOrigin()));
-        tvDestination.setText(String.valueOf(itinerary.getDestination()));
+    private void updateItineraryUI(LocationInfoToken itinerary) {
+        tvOrigin.setText(String.valueOf(itinerary.getPlaceToStart()));
+        tvDestination.setText(String.valueOf(itinerary.getPlaceToEnd()));
 
         Calendar lastUpdate = Calendar.getInstance();
-        lastUpdate.setTimeInMillis(itinerary.getStartedTime());
+        lastUpdate.setTimeInMillis(itinerary.getTimeStarted());
         lastUpdate.setTimeZone(TimeZone.getDefault());
 
         tvTravelStart.setText(new SimpleDateFormat("hh:mm:ss a - yyyy.MM.dd").format(lastUpdate.getTime()));
-        startElapsedTimeUpdateHandler(itinerary.getStartedTime());
+        startElapsedTimeUpdateHandler(itinerary.getTimeStarted());
     }
 
 

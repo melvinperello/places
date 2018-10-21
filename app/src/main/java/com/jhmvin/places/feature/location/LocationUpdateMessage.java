@@ -1,6 +1,6 @@
-package com.jhmvin.places.domain.message;
+package com.jhmvin.places.feature.location;
 
-public class LocationReceivedMessage {
+public class LocationUpdateMessage {
 
     //----------------------------------------------------------------------------------------------
     // Members.
@@ -56,5 +56,20 @@ public class LocationReceivedMessage {
 
     public void setTime(long time) {
         this.time = time;
+    }
+
+
+    /**
+     * CSV Format.
+     *
+     * @return
+     */
+    @Override
+    public String toString() {
+        return String.format("%s,%s,%s,%s,%s", this.longitude, this.latitude, this.speed, this.accuracy, this.time);
+    }
+
+    public String toCSV() {
+        return String.format("\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"", this.longitude, this.latitude, this.speed, this.accuracy, this.time);
     }
 }

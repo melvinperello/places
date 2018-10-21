@@ -13,9 +13,13 @@ import java.io.IOException;
  * <p>
  * This will make use of a buffered writer.
  */
-public class TempTravelStreamWriter implements TextWriter {
+public class TempTravelLocationWriter implements TextWriter {
 
-    public final static String DIR_TEMP_TRAVEL_STREAMS = "temp_travel_streams";
+    public static File getWorkingDirectory(Context context) {
+        return context.getDir(DIR_TEMP_TRAVEL_STREAMS, Context.MODE_PRIVATE);
+    }
+
+    public final static String DIR_TEMP_TRAVEL_STREAMS = "temp_travel_locations";
 
     private final File tempTravelStream;
     private BufferedWriter writer;
@@ -29,8 +33,8 @@ public class TempTravelStreamWriter implements TextWriter {
      *                 this constructor will automatically append .temp to the file.
      *                 Marking it as incomplete.
      */
-    public TempTravelStreamWriter(Context context, String fileName) {
-        File tempDirectory = context.getDir(DIR_TEMP_TRAVEL_STREAMS, Context.MODE_PRIVATE);
+    public TempTravelLocationWriter(Context context, String fileName) {
+        File tempDirectory = TempTravelLocationWriter.getWorkingDirectory(context);
         this.tempTravelStream = new File(tempDirectory, fileName + ".temp");
     }
 
