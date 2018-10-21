@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import com.jhmvin.places.domain.message.ActionTravelCheckMessage;
-import com.jhmvin.places.service.PlacesTravelService;
+import com.jhmvin.places.service.PlacesMainService;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -22,8 +22,8 @@ public class Places extends AppCompatActivity {
         setContentView(R.layout.activity_places);
         ButterKnife.bind(this);
 
-        Intent startTravelService = new Intent(this, PlacesTravelService.class);
-        startTravelService.setAction(PlacesTravelService.ACTION_TRAVEL_CHECK);
+        Intent startTravelService = new Intent(this, PlacesMainService.class);
+        startTravelService.setAction(PlacesMainService.ACTION_TRAVEL_CHECK);
         startService(startTravelService);
     }
 

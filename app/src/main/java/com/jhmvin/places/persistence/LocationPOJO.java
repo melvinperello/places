@@ -1,5 +1,7 @@
 package com.jhmvin.places.persistence;
 
+import java.io.FileWriter;
+
 public class LocationPOJO {
     private float accuracy = 0.0f;
     private long time = 0;
@@ -19,6 +21,7 @@ public class LocationPOJO {
     }
 
     public LocationPOJO(android.location.Location l) {
+
         this.accuracy = l.getAccuracy();
         this.time = l.getTime();
         this.elapsedRealtimeNanos = l.getElapsedRealtimeNanos();

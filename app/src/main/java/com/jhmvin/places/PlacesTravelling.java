@@ -8,7 +8,7 @@ import android.widget.TextView;
 
 import com.jhmvin.places.domain.message.ActionTravelCheckMessage;
 import com.jhmvin.places.domain.message.LocationReceivedMessage;
-import com.jhmvin.places.service.PlacesTravelService;
+import com.jhmvin.places.service.PlacesMainService;
 import com.jhmvin.places.util.ToastAdapter;
 
 import org.greenrobot.eventbus.EventBus;
@@ -73,8 +73,8 @@ public class PlacesTravelling extends AppCompatActivity {
 
         if (getIntent().getAction() != null) {
             if (getIntent().getAction().equals(ACTION_START_UPDATES)) {
-                Intent startTravelService = new Intent(this, PlacesTravelService.class);
-                startTravelService.setAction(PlacesTravelService.ACTION_TRAVEL_START);
+                Intent startTravelService = new Intent(this, PlacesMainService.class);
+                startTravelService.setAction(PlacesMainService.ACTION_TRAVEL_START);
                 startTravelService.putExtra(PlacesNew.EXTRA_PLACE_ORIGIN, getIntent().getExtras().getString(PlacesNew.EXTRA_PLACE_ORIGIN));
                 startTravelService.putExtra(PlacesNew.EXTRA_PLACE_DESTINATION, getIntent().getExtras().getString(PlacesNew.EXTRA_PLACE_DESTINATION));
                 startService(startTravelService);
@@ -111,8 +111,8 @@ public class PlacesTravelling extends AppCompatActivity {
 
     @OnClick(R.id.btnStopTravel)
     public void onClickBtnStopTravel() {
-        Intent startTravelService = new Intent(this, PlacesTravelService.class);
-        startTravelService.setAction(PlacesTravelService.ACTION_TRAVEL_STOP);
+        Intent startTravelService = new Intent(this, PlacesMainService.class);
+        startTravelService.setAction(PlacesMainService.ACTION_TRAVEL_STOP);
         startService(startTravelService);
         this.finish();
     }
@@ -122,8 +122,8 @@ public class PlacesTravelling extends AppCompatActivity {
         super.onResume();
         EventBus.getDefault().register(this);
 
-        Intent startTravelService = new Intent(this, PlacesTravelService.class);
-        startTravelService.setAction(PlacesTravelService.ACTION_TRAVEL_CHECK);
+        Intent startTravelService = new Intent(this, PlacesMainService.class);
+        startTravelService.setAction(PlacesMainService.ACTION_TRAVEL_CHECK);
         startService(startTravelService);
     }
 

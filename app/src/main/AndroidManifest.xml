@@ -36,10 +36,8 @@
 
         <!-- Service -->
         <service android:name=".service.PlacesMainService" />
-        <service android:name=".service.PlacesTravelService" />
 
         <!-- Activity -->
-        <activity android:name=".Home" />
         <activity android:name=".StartTracking" />
         <activity android:name=".TrackingLocation" />
         <activity android:name=".MainActivity" />
