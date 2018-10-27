@@ -11,7 +11,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class PlacesNew extends AppCompatActivity {
+public class TempTravelNew extends AppCompatActivity {
 
     public static final String EXTRA_PLACE_START = "EXTRA_PLACE_START";
     public static final String EXTRA_PLACE_END = "EXTRA_PLACE_END";
@@ -26,7 +26,7 @@ public class PlacesNew extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_places_new);
+        setContentView(R.layout.activity_temp_travel_new);
         ButterKnife.bind(this);
     }
 
@@ -47,8 +47,8 @@ public class PlacesNew extends AppCompatActivity {
 
         String displayString = String.format("Your Travelling from [%s] to [%s].", currentPlace, destinationPlace);
 
-        Intent intent = new Intent(this, PlacesTravelling.class);
-        intent.setAction(PlacesTravelling.ACTION_START_UPDATES);
+        Intent intent = new Intent(this, TempTravelRunning.class);
+        intent.setAction(TempTravelRunning.ACTION_START_UPDATES);
         intent.putExtra(EXTRA_PLACE_START, currentPlace);
         intent.putExtra(EXTRA_PLACE_END, destinationPlace);
         this.startActivity(intent);

@@ -14,6 +14,17 @@ public class LocationServiceUpdateMessage {
     private float accuracy;
     private long time;
 
+
+    private int count = 0;
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
+
     //----------------------------------------------------------------------------------------------
     // Getters.
     //----------------------------------------------------------------------------------------------
@@ -62,17 +73,4 @@ public class LocationServiceUpdateMessage {
     }
 
 
-    /**
-     * CSV Format.
-     *
-     * @return
-     */
-    @Override
-    public String toString() {
-        return String.format("%s,%s,%s,%s,%s", this.longitude, this.latitude, this.speed, this.accuracy, this.time);
-    }
-
-    public String toCSV() {
-        return String.format("\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"", this.longitude, this.latitude, this.speed, this.accuracy, this.time);
-    }
 }

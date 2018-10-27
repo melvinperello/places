@@ -29,13 +29,12 @@ public class Places extends AppCompatActivity {
 
     @OnClick(R.id.btnNewPlace)
     public void onClickBtnNewPlace() {
-        this.startActivity(new Intent(this, PlacesNew.class));
-        this.finish();
+        this.startActivity(new Intent(this, TempTravelNew.class));
     }
 
     @OnClick(R.id.btnViewPlaces)
     public void onClickBtnViewPlaces() {
-        Intent intent = new Intent(this, PlacesView.class);
+        Intent intent = new Intent(this, TempTravelView.class);
         startActivity(intent);
     }
 
@@ -47,7 +46,7 @@ public class Places extends AppCompatActivity {
     }
 
     private void proceedToPlacesTravelling() {
-        Intent intent = new Intent(this, PlacesTravelling.class);
+        Intent intent = new Intent(this, TempTravelRunning.class);
         this.startActivity(intent);
         this.finish();
     }

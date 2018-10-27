@@ -1,7 +1,7 @@
-package com.jhmvin.places.domain;
+package com.jhmvin.places.feature.tempTravel;
 
-public interface CSVTranslation {
-    void fromCSV(String csvString);
+public interface TempCSVTranslation {
+    void fromTempCSV(String csvString);
 
-    String toCSV();
+    String toTempCSV();
 }

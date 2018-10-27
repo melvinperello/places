@@ -41,6 +41,8 @@ public class LocationService implements LocationClient.OnLocationObtained {
         mLocationClient.setLocationCallback(this);
         mLocationClient.startLocationAwareness();
         Log.d(TAG, "Location service started.");
+        // create cache
+        Log.d(TAG, "Location cache created.");
     }
 
 
@@ -66,6 +68,7 @@ public class LocationService implements LocationClient.OnLocationObtained {
      */
     @Override
     public void onLocationObtained(Location location) {
+        // send the call back chain to the service.
         ((LocationClient.OnLocationObtained) (this.mContext)).onLocationObtained(location);
     }
 

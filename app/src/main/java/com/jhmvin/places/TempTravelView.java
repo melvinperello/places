@@ -28,7 +28,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class PlacesTempTravelView extends AppCompatActivity implements TravelStreamListDataAdapter.ItemClicked {
+public class TempTravelView extends AppCompatActivity implements TravelStreamListDataAdapter.ItemClicked {
 
 
     @BindView(R.id.rvFiles)
@@ -44,7 +44,6 @@ public class PlacesTempTravelView extends AppCompatActivity implements TravelStr
         this.files = TempTravelDirectory.getWorkingDirectory(getApplicationContext()).listFiles();
         if (files.length == 0) {
             new AlertDialog.Builder(this)
-                    .setTitle("Empty")
                     .setMessage("There are no items to clear.")
                     .setPositiveButton("Ok", null)
                     .create()
@@ -53,7 +52,7 @@ public class PlacesTempTravelView extends AppCompatActivity implements TravelStr
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Clear Cache")
+        builder
                 .setMessage("Are you sure you want to permanently delete unsaved places?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
@@ -75,12 +74,17 @@ public class PlacesTempTravelView extends AppCompatActivity implements TravelStr
         ToastAdapter.show(getApplicationContext(), "Cache Cleared", ToastAdapter.SUCCESS);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
     private File[] files;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_places_temp_travel_view);
+        setContentView(R.layout.activity_temp_travel_view);
         ButterKnife.bind(this);
 
         getSupportActionBar().setTitle("Location Record");
@@ -137,10 +141,14 @@ public class PlacesTempTravelView extends AppCompatActivity implements TravelStr
         try {
             if (this.files != null) {
                 File selectedFile = this.files[index];
-                String content = readFileToString(selectedFile);
-                Intent intent = new Intent(this, PlacesViewStream.class);
-                intent.putExtra("file_content", content);
+                Intent intent = new Intent(this, TempTravelInfo.class);
+                intent.putExtra(TempTravelInfo.FILE_NAME_INFO, selectedFile.getName());
                 startActivity(intent);
+
+//                String content = readFileToString(selectedFile);
+//                Intent intent = new Intent(this, PlacesViewStream.class);
+//                intent.putExtra("file_content", content);
+//                startActivity(intent);
             }
         } catch (Exception ex) {
             ToastAdapter.show(getApplicationContext(), "Cannot Display", ToastAdapter.ERROR);
@@ -148,6 +156,7 @@ public class PlacesTempTravelView extends AppCompatActivity implements TravelStr
     }
 
 
+    @Deprecated
     private String readFileToString(File file) {
         String content = "";
         BufferedReader reader = null;
@@ -172,4 +181,6 @@ public class PlacesTempTravelView extends AppCompatActivity implements TravelStr
             }
         }
     }
+
+
 }

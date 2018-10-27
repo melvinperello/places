@@ -1,6 +1,6 @@
-package com.jhmvin.places.domain.bean;
+package com.jhmvin.places.feature.tempTravel;
 
-public class TempTravelFooterBean implements CSVTranslation {
+public class TempTravelFooterBean implements TempCSVTranslation {
 
     private long endedTime;
 
@@ -13,12 +13,12 @@ public class TempTravelFooterBean implements CSVTranslation {
     }
 
     @Override
-    public void fromCSV(String csvString) {
+    public void fromTempCSV(String csvString) {
 
     }
 
     @Override
-    public String toCSV() {
+    public String toTempCSV() {
         return String.format("END,%s", this.endedTime);
     }
 }

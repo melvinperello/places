@@ -1,6 +1,8 @@
-package com.jhmvin.places.domain.bean;
+package com.jhmvin.places.feature.tempTravel;
 
-public class TempTravelHeaderBean implements CSVTranslation {
+import com.jhmvin.places.util.StringTool;
+
+public class TempTravelHeaderBean implements TempCSVTranslation {
     //----------------------------------------------------------------------------------------------
     // Members.
     //----------------------------------------------------------------------------------------------
@@ -41,12 +43,19 @@ public class TempTravelHeaderBean implements CSVTranslation {
     }
 
     @Override
-    public void fromCSV(String csvString) {
-
+    public void fromTempCSV(String csvString) {
+        //
+        String[] splitted = StringTool.splitCSV(csvString);
+        String start = splitted[0];
+        if (start.equals("START")) {
+            this.startPlace = StringTool.unqoute(splitted[1]);
+            this.endPlace = StringTool.unqoute(splitted[2]);
+            this.startTime = Long.parseLong(splitted[3]);
+        }
     }
 
     @Override
-    public String toCSV() {
-        return String.format("\"START\",\"%s\",\"%s\",\"%s\"", this.startPlace, this.endPlace, this.startTime);
+    public String toTempCSV() {
+        return String.format("START,\"%s\",\"%s\",%s", this.startPlace, this.endPlace, this.startTime);
     }
 }

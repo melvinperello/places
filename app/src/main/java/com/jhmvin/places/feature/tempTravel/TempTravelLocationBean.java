@@ -1,6 +1,27 @@
-package com.jhmvin.places.domain.bean;
+package com.jhmvin.places.feature.tempTravel;
 
-public class TempTravelLocationBean implements CSVTranslation {
+import android.location.Location;
+import android.os.SystemClock;
+
+public class TempTravelLocationBean implements TempCSVTranslation {
+
+    public static long getAtomicTime(long nanosTime) {
+        long bootTime = (System.currentTimeMillis() - SystemClock.elapsedRealtime());
+        long locTime = nanosTime / 1000000;
+        return bootTime + locTime;
+    }
+
+    public TempTravelLocationBean() {
+        // no-args
+    }
+
+    public TempTravelLocationBean(Location location) {
+        this.longitude = location.getLongitude();
+        this.latitude = location.getLatitude();
+        this.speed = location.getSpeed();
+        this.accuracy = location.getAccuracy();
+        this.time = getAtomicTime(location.getElapsedRealtimeNanos());
+    }
 
     //----------------------------------------------------------------------------------------------
     // Members.
@@ -59,7 +80,7 @@ public class TempTravelLocationBean implements CSVTranslation {
 
 
     @Override
-    public void fromCSV(String csvString) {
+    public void fromTempCSV(String csvString) {
 
     }
 
@@ -72,7 +93,7 @@ public class TempTravelLocationBean implements CSVTranslation {
      *
      * @return a CSV representation of this object.
      */
-    public String toCSV() {
+    public String toTempCSV() {
         return String.format("%s,%s,%s,%s,%s", this.longitude, this.latitude, this.speed, this.accuracy, this.time);
     }
 }

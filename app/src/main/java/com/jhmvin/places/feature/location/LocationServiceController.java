@@ -3,7 +3,7 @@ package com.jhmvin.places.feature.location;
 import android.content.Context;
 import android.content.Intent;
 
-import com.jhmvin.places.PlacesNew;
+import com.jhmvin.places.TempTravelNew;
 import com.jhmvin.places.util.ToastAdapter;
 
 /**
@@ -32,8 +32,8 @@ public class LocationServiceController {
      */
     private LocationInfoToken createLocationToken() {
         LocationInfoToken locationToken = new LocationInfoToken();
-        locationToken.setPlaceToStart(mStartLocationIntent.getExtras().getString(PlacesNew.EXTRA_PLACE_START));
-        locationToken.setPlaceToEnd(mStartLocationIntent.getExtras().getString(PlacesNew.EXTRA_PLACE_END));
+        locationToken.setPlaceToStart(mStartLocationIntent.getExtras().getString(TempTravelNew.EXTRA_PLACE_START));
+        locationToken.setPlaceToEnd(mStartLocationIntent.getExtras().getString(TempTravelNew.EXTRA_PLACE_END));
         locationToken.setTimeStarted(System.currentTimeMillis());
         locationToken.setStarted(false);
         return locationToken;

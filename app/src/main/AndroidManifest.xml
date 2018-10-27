@@ -48,10 +48,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".PlacesNew" />
-        <activity android:name=".PlacesTravelling" />
-        <activity android:name=".PlacesView" />
-        <activity android:name=".PlacesViewStream"></activity>
+        <activity android:name=".TempTravelNew" />
+        <activity android:name=".TempTravelRunning" />
+        <activity android:name=".TempTravelView" />
+        <activity android:name=".PlacesViewStream" />
+        <activity android:name=".PlacesMarkerNew" />
+        <activity android:name=".TempTravelInfo"></activity>
     </application>
 
 </manifest>

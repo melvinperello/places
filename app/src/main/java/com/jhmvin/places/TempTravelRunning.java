@@ -24,8 +24,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class PlacesTravelling extends AppCompatActivity {
-    public final static String CANONICAL_NAME = PlacesTravelling.class.getCanonicalName();
+public class TempTravelRunning extends AppCompatActivity {
+    public final static String CANONICAL_NAME = TempTravelRunning.class.getCanonicalName();
     public final static String ACTION_START_UPDATES = CANONICAL_NAME + ".ACTION_START_UPDATES";
 
     @BindView(R.id.tvOrigin)
@@ -66,7 +66,7 @@ public class PlacesTravelling extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_places_travelling);
+        setContentView(R.layout.activity_temp_travel_running);
         // hide action bar
         getSupportActionBar().setTitle("Places: Wandering");
         // bind
@@ -78,8 +78,8 @@ public class PlacesTravelling extends AppCompatActivity {
             if (getIntent().getAction().equals(ACTION_START_UPDATES)) {
                 Intent startTravelService = new Intent(this, PlacesMainService.class);
                 startTravelService.setAction(PlacesMainService.ACTION_TRAVEL_START);
-                startTravelService.putExtra(PlacesNew.EXTRA_PLACE_START, getIntent().getExtras().getString(PlacesNew.EXTRA_PLACE_START));
-                startTravelService.putExtra(PlacesNew.EXTRA_PLACE_END, getIntent().getExtras().getString(PlacesNew.EXTRA_PLACE_END));
+                startTravelService.putExtra(TempTravelNew.EXTRA_PLACE_START, getIntent().getExtras().getString(TempTravelNew.EXTRA_PLACE_START));
+                startTravelService.putExtra(TempTravelNew.EXTRA_PLACE_END, getIntent().getExtras().getString(TempTravelNew.EXTRA_PLACE_END));
                 startService(startTravelService);
             }
         }

@@ -50,7 +50,7 @@ public class TravelStreamListDataAdapter extends RecyclerView.Adapter<TravelStre
     @NonNull
     @Override
     public TravelStreamListDataAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item, viewGroup, false);
+        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item_temp_travel_view, viewGroup, false);
         return new ViewHolder(v);
     }
 

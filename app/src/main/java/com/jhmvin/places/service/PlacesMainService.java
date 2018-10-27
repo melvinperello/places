@@ -3,15 +3,18 @@ package com.jhmvin.places.service;
 import android.app.Service;
 import android.content.Intent;
 import android.location.Location;
+import android.os.Binder;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.jhmvin.places.feature.location.LocationClient;
 import com.jhmvin.places.feature.location.LocationInfoToken;
 import com.jhmvin.places.feature.location.LocationServiceController;
-import com.jhmvin.places.persistence.text.TempTravelLocationWriter;
+import com.jhmvin.places.feature.tempTravel.TempTravelWriter;
+import com.jhmvin.places.feature.tempTravel.TempTravelFooterBean;
+import com.jhmvin.places.feature.tempTravel.TempTravelHeaderBean;
+import com.jhmvin.places.feature.tempTravel.TempTravelLocationBean;
 import com.jhmvin.places.persistence.text.TextWriter;
 import com.jhmvin.places.util.ToastAdapter;
 
@@ -21,6 +24,8 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 public class PlacesMainService extends Service implements Standby, LocationClient.OnLocationObtained {
     private final static String TAG = PlacesMainService.class.getCanonicalName();
@@ -74,6 +79,17 @@ public class PlacesMainService extends Service implements Standby, LocationClien
     //----------------------------------------------------------------------------------------------
 
     /**
+     * Local Binder.
+     */
+    public class MainServiceBinder extends Binder {
+        public PlacesMainService getService() {
+            return PlacesMainService.this;
+        }
+    }
+
+    private final IBinder mLocalBinder = new MainServiceBinder();
+
+    /**
      * This service is not bound. Ignore this.
      *
      * @param intent
@@ -82,7 +98,7 @@ public class PlacesMainService extends Service implements Standby, LocationClien
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return mLocalBinder;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -107,16 +123,21 @@ public class PlacesMainService extends Service implements Standby, LocationClien
         //
         // Save The File Name
         LocationInfoToken token = locationServiceController.getToken();
-        this.fileName = token.getPlaceToStart() + "_" + token.getPlaceToEnd() + "_" + String.valueOf(token.getTimeStarted());
+        this.fileName = String.valueOf(token.getTimeStarted());
         // create the instance once
         this.createTextWriterInstance();
 
         try {
+
+
+            TempTravelHeaderBean header = new TempTravelHeaderBean();
+            header.setStartPlace(token.getPlaceToStart());
+            header.setEndPlace(token.getPlaceToEnd());
+            header.setStartTime(token.getTimeStarted());
             // open
             this.tempTravelLocationWriter.open();
             // write something
-            String formatted = String.format("\"START\",\"%s\",\"%s\",\"%s\"", token.getPlaceToStart(), token.getPlaceToEnd(), token.getTimeStarted());
-            this.tempTravelLocationWriter.write(formatted);
+            this.tempTravelLocationWriter.write(header.toTempCSV());
             this.tempTravelLocationWriter.close();
         } catch (IOException e) {
             ToastAdapter.show(getApplicationContext(), "Cannot initialize writer.", ToastAdapter.ERROR);
@@ -129,6 +150,7 @@ public class PlacesMainService extends Service implements Standby, LocationClien
     private void stopLocationService() {
         if (locationServiceController != null) {
             locationServiceController.stopService();
+            locationServiceController = null;
         }
         //
         this.closeWriter();
@@ -148,24 +170,26 @@ public class PlacesMainService extends Service implements Standby, LocationClien
 
     @Override
     public void onLocationObtained(Location location) {
-        LocationServiceUpdateMessage locMessage = new LocationServiceUpdateMessage();
-        locMessage.setLongitude(location.getLongitude());
-        locMessage.setLatitude(location.getLatitude());
-        locMessage.setSpeed(location.getSpeed());
-        locMessage.setAccuracy(location.getAccuracy());
+        // experimental
+        TempTravelLocationBean locationBean = new TempTravelLocationBean(location);
+        this.writeLocation(locationBean);
 
-        long bootTime = (System.currentTimeMillis() - SystemClock.elapsedRealtime());
-        long locTime = location.getElapsedRealtimeNanos() / 1000000;
-        long timeRecordedMills = bootTime + locTime;
-
-        locMessage.setTime(timeRecordedMills);
+        // real
         if (!isStandby()) {
+            LocationServiceUpdateMessage locMessage = new LocationServiceUpdateMessage();
+            locMessage.setLongitude(locationBean.getLongitude());
+            locMessage.setLatitude(locationBean.getLatitude());
+            locMessage.setSpeed(locationBean.getSpeed());
+            locMessage.setAccuracy(locationBean.getAccuracy());
+            locMessage.setTime(locationBean.getTime());
+
+            locMessage.setCount(this.locationCompleteCache.size());
+
             EventBus.getDefault().post(locMessage);
         } else {
             Log.d(TAG, "Sleep mode -> no location broadcast");
         }
-        // experimental
-        this.writeLocation(locMessage);
+
     }
 
 
@@ -216,12 +240,14 @@ public class PlacesMainService extends Service implements Standby, LocationClien
     /**
      * Contains temporary location.
      */
-    private ArrayList<LocationServiceUpdateMessage> locationCache;
+    private ArrayList<TempTravelLocationBean> locationCache;
+    private List<TempTravelLocationBean> locationCompleteCache;
 
 
     private void createTextWriterInstance() {
-        this.tempTravelLocationWriter = new TempTravelLocationWriter(this, this.fileName);
+        this.tempTravelLocationWriter = new TempTravelWriter(this, this.fileName);
         this.locationCache = new ArrayList<>();
+        this.locationCompleteCache = new LinkedList<>();
     }
 
     private void destroyWriter() {
@@ -237,7 +263,9 @@ public class PlacesMainService extends Service implements Standby, LocationClien
 
     }
 
-    private void writeLocation(LocationServiceUpdateMessage location) {
+    private void writeLocation(TempTravelLocationBean location) {
+        this.locationCompleteCache.add(location);
+
         if (tempTravelLocationWriter != null) {
             if (locationCache != null) {
                 if (location != null) {
@@ -260,12 +288,11 @@ public class PlacesMainService extends Service implements Standby, LocationClien
                     // open the writer.
                     this.tempTravelLocationWriter.open();
 
-                    for (LocationServiceUpdateMessage loc : locationCache) {
-                        this.tempTravelLocationWriter.write("\n" + loc.toCSV());
+                    for (TempTravelLocationBean loc : locationCache) {
+                        this.tempTravelLocationWriter.write("\n" + loc.toTempCSV());
                     }
                     // close
                     this.tempTravelLocationWriter.close();
-
 
                     // clear the list
                     this.locationCache.clear();
@@ -283,12 +310,16 @@ public class PlacesMainService extends Service implements Standby, LocationClien
             this.writeToFile();
             try {
                 this.tempTravelLocationWriter.open();
-                this.tempTravelLocationWriter.write(String.format("\n\"END\",\"%s\"", System.currentTimeMillis()));
+                TempTravelFooterBean footer = new TempTravelFooterBean();
+                footer.setEndedTime(System.currentTimeMillis());
+                this.tempTravelLocationWriter.write("\n" + footer.toTempCSV());
                 this.tempTravelLocationWriter.close();
                 this.destroyWriter();
                 this.locationCache = null;
+                this.locationCompleteCache.clear();
+                this.locationCompleteCache = null;
             } catch (IOException e) {
-                ToastAdapter.show(getApplicationContext(), "Saving Error", ToastAdapter.ERROR);
+                ToastAdapter.show(getApplicationContext(), "TextWriterSaving Error", ToastAdapter.ERROR);
                 this.destroyWriter();
             }
         }
