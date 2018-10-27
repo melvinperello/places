@@ -1,6 +1,9 @@
-package com.jhmvin.places.feature.location;
+package com.jhmvin.places.service;
 
-public class LocationUpdateMessage {
+/**
+ * A Message to broadcast the data from the location service.
+ */
+public class LocationServiceUpdateMessage {
 
     //----------------------------------------------------------------------------------------------
     // Members.

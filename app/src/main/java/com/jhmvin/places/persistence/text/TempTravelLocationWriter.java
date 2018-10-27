@@ -40,7 +40,8 @@ public class TempTravelLocationWriter implements TextWriter {
 
     @Override
     public void open() throws IOException {
-        this.writer = new BufferedWriter(new FileWriter(this.tempTravelStream));
+        this.writer = new BufferedWriter(new FileWriter(this.tempTravelStream,true));
+
     }
 
     @Override

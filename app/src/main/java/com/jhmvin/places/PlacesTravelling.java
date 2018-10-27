@@ -7,7 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
 import com.jhmvin.places.feature.location.LocationInfoToken;
-import com.jhmvin.places.feature.location.LocationUpdateMessage;
+import com.jhmvin.places.service.LocationServiceUpdateMessage;
 import com.jhmvin.places.service.PlacesMainService;
 import com.jhmvin.places.util.ToastAdapter;
 
@@ -124,11 +124,13 @@ public class PlacesTravelling extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        EventBus.getDefault().register(this);
 
+        EventBus.getDefault().register(this);
         Intent startTravelService = new Intent(this, PlacesMainService.class);
         startTravelService.setAction(PlacesMainService.ACTION_TRAVEL_CHECK);
         startService(startTravelService);
+
+
     }
 
 
@@ -136,13 +138,17 @@ public class PlacesTravelling extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         EventBus.getDefault().unregister(this);
+        //
+        Intent startTravelService = new Intent(this, PlacesMainService.class);
+        startTravelService.setAction(PlacesMainService.ACTION_SERVICE_SLEEP);
+        startService(startTravelService);
         // stop elapsed time counter
         this.stopElapsedTimeUpdateHandler();
     }
 
     // UI Updates must be on the Main Thread.
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onLocationUpdated(LocationUpdateMessage locationReceivedMessage) {
+    public void onLocationUpdated(LocationServiceUpdateMessage locationReceivedMessage) {
         this.updateLocationUI(locationReceivedMessage);
     }
 
@@ -152,7 +158,7 @@ public class PlacesTravelling extends AppCompatActivity {
         this.updateItineraryUI(itinerary);
     }
 
-    private void updateLocationUI(LocationUpdateMessage locationReceivedMessage) {
+    private void updateLocationUI(LocationServiceUpdateMessage locationReceivedMessage) {
         DecimalFormat decimalFormat = new DecimalFormat("#,##0.00");
         double speed = (double) locationReceivedMessage.getSpeed();
         double accuracy = (double) locationReceivedMessage.getAccuracy();

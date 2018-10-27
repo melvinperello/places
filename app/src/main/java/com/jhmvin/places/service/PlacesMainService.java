@@ -2,14 +2,15 @@ package com.jhmvin.places.service;
 
 import android.app.Service;
 import android.content.Intent;
+import android.location.Location;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.jhmvin.places.PlacesNew;
+import com.jhmvin.places.feature.location.LocationClient;
 import com.jhmvin.places.feature.location.LocationInfoToken;
-import com.jhmvin.places.feature.location.LocationServiceFragment;
-import com.jhmvin.places.feature.location.LocationUpdateMessage;
+import com.jhmvin.places.feature.location.LocationServiceController;
 import com.jhmvin.places.persistence.text.TempTravelLocationWriter;
 import com.jhmvin.places.persistence.text.TextWriter;
 import com.jhmvin.places.util.ToastAdapter;
@@ -20,9 +21,8 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
-public class PlacesMainService extends Service implements BedTime, LocationServiceFragment.OnLocationUpdateMessageCreated {
+public class PlacesMainService extends Service implements Standby, LocationClient.OnLocationObtained {
     private final static String TAG = PlacesMainService.class.getCanonicalName();
 
 
@@ -45,31 +45,28 @@ public class PlacesMainService extends Service implements BedTime, LocationServi
      * Intent Action to check Location gathering.
      */
     public final static String ACTION_TRAVEL_CHECK = CANONICAL_NAME + ".ACTION_TRAVEL_CHECK";
+
+    public final static String ACTION_SERVICE_SLEEP = CANONICAL_NAME + ".ACTION_SERVICE_SLEEP";
     /**
      * Intent Action to get all recorded location in this session.
      */
 //    public final static String ACTION_GET_POINTS = CANONICAL_NAME + ".ACTION_GET_POINTS";
     //----------------------------------------------------------------------------------------------
-    // Service Awake (BedTime).
+    // Service Awake (Standby).
     //----------------------------------------------------------------------------------------------
     /**
      * Is this service Awake ?
      */
-    private boolean mServiceAwake = false;
+    private boolean mStandbyEnabled = true;
 
     @Override
-    public void sleepMode() {
-        this.mServiceAwake = false;
+    public void setStanbyEnabled(boolean standby) {
+        this.mStandbyEnabled = standby;
     }
 
     @Override
-    public void wakeMode() {
-        this.mServiceAwake = true;
-    }
-
-    @Override
-    public boolean isAwake() {
-        return this.mServiceAwake;
+    public boolean isStandby() {
+        return this.mStandbyEnabled;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -91,48 +88,48 @@ public class PlacesMainService extends Service implements BedTime, LocationServi
     //----------------------------------------------------------------------------------------------
     // Service.
     //----------------------------------------------------------------------------------------------
-    private LocationServiceFragment mLocationServiceFragment;
-
-    private LocationInfoToken createLocationToken(Intent intent) {
-        LocationInfoToken locationToken = new LocationInfoToken();
-        locationToken.setPlaceToStart(intent.getExtras().getString(PlacesNew.EXTRA_PLACE_START));
-        locationToken.setPlaceToEnd(intent.getExtras().getString(PlacesNew.EXTRA_PLACE_END));
-        locationToken.setTimeStarted(System.currentTimeMillis());
-        locationToken.setStarted(false);
-        return locationToken;
-    }
+    /**
+     * Controls the location service.
+     */
+    private LocationServiceController locationServiceController;
 
     private void startLocationService(Intent intent) {
-        LocationInfoToken token = createLocationToken(intent);
-        if (mLocationServiceFragment == null) {
-            mLocationServiceFragment = new LocationServiceFragment(PlacesMainService.this);
+        if (locationServiceController != null) {
+            locationServiceController.stopService();
         }
-        mLocationServiceFragment.startService(token);
-        ToastAdapter.show(getApplicationContext(), "Travel Start Command", ToastAdapter.SUCCESS);
+        locationServiceController = new LocationServiceController(this, intent);
+        locationServiceController.startService();
         // experimental block
-        String fileName = token.getPlaceToStart() + "_" + token.getPlaceToEnd() + "_" + String.valueOf(token.getTimeStarted());
-        this.createWriter(fileName); // no extension please.
+        //
+        //
+        //
+        //
+        //
+        // Save The File Name
+        LocationInfoToken token = locationServiceController.getToken();
+        this.fileName = token.getPlaceToStart() + "_" + token.getPlaceToEnd() + "_" + String.valueOf(token.getTimeStarted());
+        // create the instance once
+        this.createTextWriterInstance();
+
         try {
+            // open
             this.tempTravelLocationWriter.open();
             // write something
             String formatted = String.format("\"START\",\"%s\",\"%s\",\"%s\"", token.getPlaceToStart(), token.getPlaceToEnd(), token.getTimeStarted());
             this.tempTravelLocationWriter.write(formatted);
-            // flush data
-            this.tempTravelLocationWriter.flush();
+            this.tempTravelLocationWriter.close();
         } catch (IOException e) {
             ToastAdapter.show(getApplicationContext(), "Cannot initialize writer.", ToastAdapter.ERROR);
-            this.unsetWriter();
+            // incase of erro close the writer.
+            this.destroyWriter();
         }
 
     }
 
     private void stopLocationService() {
-        if (mLocationServiceFragment != null) {
-            mLocationServiceFragment.stopService();
+        if (locationServiceController != null) {
+            locationServiceController.stopService();
         }
-        mLocationServiceFragment = null;
-        ToastAdapter.show(getApplicationContext(), "Travel Stop Command", ToastAdapter.ERROR);
-
         //
         this.closeWriter();
     }
@@ -142,18 +139,33 @@ public class PlacesMainService extends Service implements BedTime, LocationServi
     //----------------------------------------------------------------------------------------------
 
     private void checkLocationService() {
-        if (mLocationServiceFragment == null) {
-            EventBus.getDefault().post(new LocationUpdateMessage());
+        if (this.locationServiceController == null) {
+            EventBus.getDefault().post(new LocationServiceUpdateMessage());
         } else {
-            EventBus.getDefault().post(mLocationServiceFragment.getLocationInfoToken());
+            EventBus.getDefault().post(locationServiceController.getToken());
         }
     }
 
     @Override
-    public void onLocationUpdateMessageCreated(LocationUpdateMessage locationMessage) {
-        EventBus.getDefault().post(locationMessage);
+    public void onLocationObtained(Location location) {
+        LocationServiceUpdateMessage locMessage = new LocationServiceUpdateMessage();
+        locMessage.setLongitude(location.getLongitude());
+        locMessage.setLatitude(location.getLatitude());
+        locMessage.setSpeed(location.getSpeed());
+        locMessage.setAccuracy(location.getAccuracy());
+
+        long bootTime = (System.currentTimeMillis() - SystemClock.elapsedRealtime());
+        long locTime = location.getElapsedRealtimeNanos() / 1000000;
+        long timeRecordedMills = bootTime + locTime;
+
+        locMessage.setTime(timeRecordedMills);
+        if (!isStandby()) {
+            EventBus.getDefault().post(locMessage);
+        } else {
+            Log.d(TAG, "Sleep mode -> no location broadcast");
+        }
         // experimental
-        this.writeLocation(locationMessage);
+        this.writeLocation(locMessage);
     }
 
 
@@ -166,7 +178,10 @@ public class PlacesMainService extends Service implements BedTime, LocationServi
                 } else if (intent.getAction().equals(ACTION_TRAVEL_STOP)) {
                     stopLocationService();
                 } else if (intent.getAction().equals(ACTION_TRAVEL_CHECK)) {
+                    setStanbyEnabled(false);
                     checkLocationService();
+                } else if (intent.getAction().equals(ACTION_SERVICE_SLEEP)) {
+                    setStanbyEnabled(true);
                 }
             }
         }
@@ -190,15 +205,26 @@ public class PlacesMainService extends Service implements BedTime, LocationServi
     // Temp Writing Concept Block
     //----------------------------------------------------------------------------------------------
 
+    /**
+     * Text Writer Instance.
+     */
     private TextWriter tempTravelLocationWriter;
-    private List<LocationUpdateMessage> locationCache;
+    /**
+     * The File name.
+     */
+    private String fileName;
+    /**
+     * Contains temporary location.
+     */
+    private ArrayList<LocationServiceUpdateMessage> locationCache;
 
-    private void createWriter(String fileName) {
-        this.tempTravelLocationWriter = new TempTravelLocationWriter(this, fileName);
+
+    private void createTextWriterInstance() {
+        this.tempTravelLocationWriter = new TempTravelLocationWriter(this, this.fileName);
         this.locationCache = new ArrayList<>();
     }
 
-    private void unsetWriter() {
+    private void destroyWriter() {
         if (this.tempTravelLocationWriter != null) {
             try {
                 this.tempTravelLocationWriter.close();
@@ -208,10 +234,10 @@ public class PlacesMainService extends Service implements BedTime, LocationServi
         }
 
         this.tempTravelLocationWriter = null;
-        this.locationCache = null;
+
     }
 
-    private void writeLocation(LocationUpdateMessage location) {
+    private void writeLocation(LocationServiceUpdateMessage location) {
         if (tempTravelLocationWriter != null) {
             if (locationCache != null) {
                 if (location != null) {
@@ -231,16 +257,23 @@ public class PlacesMainService extends Service implements BedTime, LocationServi
         if (this.locationCache != null) {
             try {
                 if (this.tempTravelLocationWriter != null) {
-                    for (LocationUpdateMessage loc : locationCache) {
+                    // open the writer.
+                    this.tempTravelLocationWriter.open();
+
+                    for (LocationServiceUpdateMessage loc : locationCache) {
                         this.tempTravelLocationWriter.write("\n" + loc.toCSV());
                     }
-                    this.tempTravelLocationWriter.flush();
-                    ToastAdapter.show(getApplicationContext(), "Write Success", ToastAdapter.SUCCESS);
+                    // close
+                    this.tempTravelLocationWriter.close();
+
+
+                    // clear the list
                     this.locationCache.clear();
+                    ToastAdapter.show(getApplicationContext(), "Write Success [" + String.valueOf(this.locationCache.size()) + "]", ToastAdapter.SUCCESS);
                 }
             } catch (IOException e) {
                 ToastAdapter.show(getApplicationContext(), "Write Error", ToastAdapter.ERROR);
-                this.unsetWriter();
+                this.destroyWriter();
             }
         }
     }
@@ -249,14 +282,17 @@ public class PlacesMainService extends Service implements BedTime, LocationServi
         if (this.tempTravelLocationWriter != null) {
             this.writeToFile();
             try {
+                this.tempTravelLocationWriter.open();
                 this.tempTravelLocationWriter.write(String.format("\n\"END\",\"%s\"", System.currentTimeMillis()));
-                this.tempTravelLocationWriter.flush();
                 this.tempTravelLocationWriter.close();
-                this.unsetWriter();
+                this.destroyWriter();
+                this.locationCache = null;
             } catch (IOException e) {
                 ToastAdapter.show(getApplicationContext(), "Saving Error", ToastAdapter.ERROR);
-                this.unsetWriter();
+                this.destroyWriter();
             }
         }
     }
+
+
 }
