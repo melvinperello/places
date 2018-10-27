@@ -40,6 +40,9 @@ public class PlacesTravelling extends AppCompatActivity {
     @BindView(R.id.tvTimeElapse)
     TextView tvTimeElapse;
 
+    @BindView(R.id.tvCount)
+    TextView tvCount;
+
     @BindView(R.id.tvLatitude)
     TextView tvLatitude;
 
@@ -65,7 +68,7 @@ public class PlacesTravelling extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_places_travelling);
         // hide action bar
-        getSupportActionBar().hide();
+        getSupportActionBar().setTitle("Places: Wandering");
         // bind
         ButterKnife.bind(this);
         // clear fields
@@ -87,6 +90,7 @@ public class PlacesTravelling extends AppCompatActivity {
         this.tvDestination.setText("");
         this.tvTravelStart.setText("");
         this.tvTimeElapse.setText("");
+        this.tvCount.setText("");
         tvLongitude.setText("");
         tvLatitude.setText("");
         tvSpeed.setText("");
@@ -94,12 +98,20 @@ public class PlacesTravelling extends AppCompatActivity {
         tvLastTime.setText("");
     }
 
-    @OnClick(R.id.btnAddPoint)
+    @OnClick(R.id.btnAddMarker)
     public void onClickBtnAddPoint() {
-        ToastAdapter.show(this, "Add was clicked.");
+        if (this.mLastLocation == null) {
+            ToastAdapter.show(this, "Please Wait,Application Not Ready.", ToastAdapter.INFO);
+        } else {
+            Intent intent = new Intent(this, PlacesMarkerNew.class);
+            intent.putExtra("long", String.valueOf(mLastLocation.getLongitude()));
+            intent.putExtra("lat", String.valueOf(mLastLocation.getLatitude()));
+            intent.putExtra("time", String.valueOf(mLocationToken.getTimeStarted()));
+            startActivity(intent);
+        }
     }
 
-    @OnClick(R.id.btnViewPoints)
+    @OnClick(R.id.btnViewMarker)
     public void onClickBtnViewPoints() {
         ToastAdapter.show(this, "View was clicked.");
     }
@@ -158,7 +170,11 @@ public class PlacesTravelling extends AppCompatActivity {
         this.updateItineraryUI(itinerary);
     }
 
+    private LocationServiceUpdateMessage mLastLocation;
+    private LocationInfoToken mLocationToken;
+
     private void updateLocationUI(LocationServiceUpdateMessage locationReceivedMessage) {
+        this.mLastLocation = locationReceivedMessage;
         DecimalFormat decimalFormat = new DecimalFormat("#,##0.00");
         double speed = (double) locationReceivedMessage.getSpeed();
         double accuracy = (double) locationReceivedMessage.getAccuracy();
@@ -176,10 +192,14 @@ public class PlacesTravelling extends AppCompatActivity {
         lastUpdate.setTimeZone(TimeZone.getDefault());
 
         tvLastTime.setText(new SimpleDateFormat("hh:mm:ss a").format(lastUpdate.getTime()));
+
+
+        this.tvCount.setText(String.valueOf(locationReceivedMessage.getCount()) + " Location Points");
     }
 
 
     private void updateItineraryUI(LocationInfoToken itinerary) {
+        this.mLocationToken = itinerary;
         tvOrigin.setText(String.valueOf(itinerary.getPlaceToStart()));
         tvDestination.setText(String.valueOf(itinerary.getPlaceToEnd()));
 

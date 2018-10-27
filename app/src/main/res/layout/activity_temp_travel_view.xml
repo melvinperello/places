@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:layout_margin="10dp"
     android:orientation="vertical"
-    tools:context=".PlacesView">
+    tools:context=".PlacesTempTravelView">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rvFiles"
@@ -13,9 +13,10 @@
         android:layout_height="0dp"
         android:layout_weight="1" />
 
+
     <Button
-        android:id="@+id/btnAdd"
+        android:id="@+id/btnClear"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Add" />
+        android:text="Clear" />
 </LinearLayout>

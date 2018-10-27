@@ -1,6 +1,8 @@
-package com.jhmvin.places.persistence.text;
+package com.jhmvin.places.feature.tempTravel;
 
 import android.content.Context;
+
+import com.jhmvin.places.persistence.text.TextWriter;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -13,7 +15,7 @@ import java.io.IOException;
  * <p>
  * This will make use of a buffered writer.
  */
-public class TempTravelLocationWriter implements TextWriter {
+public class TempLocationWriter implements TextWriter {
 
     public static File getWorkingDirectory(Context context) {
         return context.getDir(DIR_TEMP_TRAVEL_STREAMS, Context.MODE_PRIVATE);
@@ -33,14 +35,14 @@ public class TempTravelLocationWriter implements TextWriter {
      *                 this constructor will automatically append .temp to the file.
      *                 Marking it as incomplete.
      */
-    public TempTravelLocationWriter(Context context, String fileName) {
-        File tempDirectory = TempTravelLocationWriter.getWorkingDirectory(context);
+    public TempLocationWriter(Context context, String fileName) {
+        File tempDirectory = TempLocationWriter.getWorkingDirectory(context);
         this.tempTravelStream = new File(tempDirectory, fileName + ".temp");
     }
 
     @Override
     public void open() throws IOException {
-        this.writer = new BufferedWriter(new FileWriter(this.tempTravelStream,true));
+        this.writer = new BufferedWriter(new FileWriter(this.tempTravelStream, true));
 
     }
 
@@ -49,10 +51,6 @@ public class TempTravelLocationWriter implements TextWriter {
         this.writer.write(text);
     }
 
-    @Override
-    public void flush() throws IOException {
-        this.writer.flush();
-    }
 
     @Override
     public void close() throws IOException {
