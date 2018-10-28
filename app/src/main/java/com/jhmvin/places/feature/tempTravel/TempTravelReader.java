@@ -28,6 +28,10 @@ public class TempTravelReader implements TextReader {
         this.mTempTravelFile = new File(tempDirectory, fileName);
     }
 
+    public TempTravelReader(File file) {
+        this.mTempTravelFile = file;
+    }
+
     @Override
     public void open() throws IOException {
         this.mReader = new BufferedReader(new FileReader(mTempTravelFile));

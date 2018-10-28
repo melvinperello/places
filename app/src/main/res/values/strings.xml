@@ -4,9 +4,16 @@
     <string name="mark_location">Mark Location</string>
     <string name="stop_tracking">Stop Tracking</string>
 
-    <string name="track_your_moments">Track your moments</string>
     <string name="from">From</string>
     <string name="to">To</string>
+    <string name="there_are_no_items_to_clear">There are no items to clear.</string>
+    <string name="ok">OK</string>
+    <string name="are_you_sure_to_delete_unsaved_places">Are you sure you want to permanently delete unsaved places?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="clear">Clear</string>
+    <string name="recent_places">Recent Places</string>
+    <string name="summary">Summary</string>
 
 
 </resources>

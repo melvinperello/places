@@ -14,7 +14,11 @@ public class TempTravelFooterBean implements TempCSVTranslation {
 
     @Override
     public void fromTempCSV(String csvString) {
-
+        String[] splitted = csvString.split(",");
+        String end = splitted[0];
+        if (end.equals("END")) {
+            this.endedTime = Long.parseLong(splitted[1]);
+        }
     }
 
     @Override

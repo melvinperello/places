@@ -7,6 +7,10 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.jhmvin.places.domain.TravelStreamListData;
 import com.jhmvin.places.domain.TravelStreamListDataAdapter;
@@ -16,81 +20,47 @@ import com.jhmvin.places.feature.tempTravel.TempTravelReader;
 import com.jhmvin.places.persistence.text.TextReader;
 import com.jhmvin.places.util.ToastAdapter;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 public class TempTravelView extends AppCompatActivity implements TravelStreamListDataAdapter.ItemClicked {
+    /**
+     * Logging tag.
+     */
+    public final static String TAG = TempTravelView.class.getCanonicalName();
+    /**
+     * formatter.
+     */
+    private final SimpleDateFormat mDateFormatter = new SimpleDateFormat("MMMMMMMMMMMMMMMM dd, yyyy hh:mm:ss a");
 
 
     @BindView(R.id.rvFiles)
     RecyclerView rvFiles;
 
 
+    private RecyclerView.Adapter adapter;
+
+    private final List<File> mDisplayUnsavedFiles = new ArrayList<>();
     private final ArrayList<TravelStreamListData> dataList = new ArrayList<>();
-    RecyclerView.Adapter adapter;
 
-
-    @OnClick(R.id.btnClear)
-    public void onClickBtnClear() {
-        this.files = TempTravelDirectory.getWorkingDirectory(getApplicationContext()).listFiles();
-        if (files.length == 0) {
-            new AlertDialog.Builder(this)
-                    .setMessage("There are no items to clear.")
-                    .setPositiveButton("Ok", null)
-                    .create()
-                    .show();
-            return;
-        }
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder
-                .setMessage("Are you sure you want to permanently delete unsaved places?")
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        clearCache();
-                    }
-                })
-                .setNegativeButton("No", null)
-                .create().show();
-    }
-
-    private void clearCache() {
-        this.files = TempTravelDirectory.getWorkingDirectory(getApplicationContext()).listFiles();
-        for (File f : files) {
-            f.delete();
-        }
-        this.dataList.clear();
-        this.adapter.notifyDataSetChanged();
-        ToastAdapter.show(getApplicationContext(), "Cache Cleared", ToastAdapter.SUCCESS);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    private File[] files;
+    private boolean mViewEmpty = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_temp_travel_view);
         ButterKnife.bind(this);
+        // change title
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(R.string.recent_places);
 
-        getSupportActionBar().setTitle("Location Record");
-
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MMMMMMMMMMMMMMMM dd, yyyy hh:mm:ss a");
 
         rvFiles.setHasFixedSize(true);
         LinearLayoutManager manager = new LinearLayoutManager(this);
@@ -98,87 +68,171 @@ public class TempTravelView extends AppCompatActivity implements TravelStreamLis
 
         this.adapter = new TravelStreamListDataAdapter(this, dataList);
         this.rvFiles.setAdapter(adapter);
-        this.files = TempTravelDirectory.getWorkingDirectory(getApplicationContext()).listFiles();
-        for (File f : files) {
-
-            if (f.getName().contains("_marker")) {
-                continue;
-            }
-            TravelStreamListData data = new TravelStreamListData();
-            TextReader reader = null;
-            try {
-                reader = new TempTravelReader(getApplicationContext(), f.getName());
-                reader.open();
-                String firstLine = reader.read();
-                TempTravelHeaderBean header = new TempTravelHeaderBean();
-                header.fromTempCSV(firstLine);
-                data.setOrigin(header.getStartPlace());
-                data.setDestination(header.getEndPlace());
-                Calendar c = Calendar.getInstance();
-                c.setTimeInMillis(header.getStartTime());
-                data.setStartTime(dateFormat.format(c.getTime()));
-
-            } catch (IOException ex) {
-                continue;
-            } finally {
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (IOException e) {
-                        //ignore
-                    }
-                }
-            }
-            this.dataList.add(data);
-            this.adapter.notifyDataSetChanged();
-        }
-
 
     }
 
     @Override
-    public void onItemClicked(int index) {
-        try {
-            if (this.files != null) {
-                File selectedFile = this.files[index];
-                Intent intent = new Intent(this, TempTravelInfo.class);
-                intent.putExtra(TempTravelInfo.FILE_NAME_INFO, selectedFile.getName());
-                startActivity(intent);
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
+    }
 
-//                String content = readFileToString(selectedFile);
-//                Intent intent = new Intent(this, PlacesViewStream.class);
-//                intent.putExtra("file_content", content);
-//                startActivity(intent);
-            }
-        } catch (Exception ex) {
-            ToastAdapter.show(getApplicationContext(), "Cannot Display", ToastAdapter.ERROR);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_item_clear:
+                onClearCache();
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_temp_travel_view, menu);
+
+        if (this.mViewEmpty) {
+            MenuItem action_item_clear = menu.findItem(R.id.action_item_clear);
+            action_item_clear.setVisible(false);
+        }
+
+
+        return true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // refresh.
+        this.refreshData();
+        Log.d(TAG, "Refresh Data . . .");
+
+        if (this.dataList.isEmpty()) {
+            mViewEmpty = true;
+            invalidateOptionsMenu(); // recall the onCreateOptionsMenu
+            Log.d(TAG, "No data to display.");
         }
     }
 
+    private void refreshData() {
+        this.refreshUnsavedFiles();
+        this.refreshAdapterData();
+    }
 
-    @Deprecated
-    private String readFileToString(File file) {
-        String content = "";
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new FileReader(file));
-            String line = reader.readLine();
-            while (line != null) {
-                content += (line + "\n");
-                line = reader.readLine();
+
+    private void refreshUnsavedFiles() {
+        List<File> files = new ArrayList<>();
+        File tempDir = TempTravelDirectory.getWorkingDirectory(getApplicationContext());
+        String[] fileNames = tempDir.list();
+        for (String fileName : fileNames) {
+            if (fileName.contains("_marker.temp")) {
+                continue;
             }
-            return content;
-        } catch (Exception ex) {
-            return "read error !";
+            files.add(new File(tempDir, fileName));
+        }
+        mDisplayUnsavedFiles.clear();
+        mDisplayUnsavedFiles.addAll(files);
+    }
+
+    /**
+     * Refresh adapter data.
+     */
+    private void refreshAdapterData() {
+        this.dataList.clear();
+        for (File placeFile : mDisplayUnsavedFiles) {
+            // read first line
+            String firstLine = readFirstLine(placeFile);
+            if (firstLine == null) {
+                continue;
+            }
+            // translate header
+            TempTravelHeaderBean header = new TempTravelHeaderBean();
+            header.fromTempCSV(firstLine);
+            // create item.
+            TravelStreamListData data = new TravelStreamListData();
+            data.setOrigin(header.getStartPlace());
+            data.setDestination(header.getEndPlace());
+            Calendar c = Calendar.getInstance();
+            c.setTimeInMillis(header.getStartTime());
+            data.setStartTime(mDateFormatter.format(c.getTime()));
+            this.dataList.add(data);
+        }
+        this.adapter.notifyDataSetChanged();
+    }
+
+    private String readFirstLine(File placeFile) {
+        // create reader
+        TextReader reader = null;
+        String firstLine;
+        try {
+            // instantiate reader.
+            reader = new TempTravelReader(getApplicationContext(), placeFile.getName());
+            // open reader.
+            reader.open();
+            // get only the first line which containes the header.
+            firstLine = reader.read();
+        } catch (IOException ex) {
+            firstLine = null;
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
-                } catch (IOException ioex) {
-                    // ignore
+                } catch (IOException e) {
+                    //ignore
                 }
-                reader = null;
             }
+        }
+        return firstLine;
+    }
+
+
+    private void onClearCache() {
+        if (mDisplayUnsavedFiles.size() == 0) {
+            new AlertDialog.Builder(this)
+                    .setMessage(R.string.there_are_no_items_to_clear)
+                    .setPositiveButton(R.string.ok, null)
+                    .create()
+                    .show();
+            return;
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder
+                .setMessage(R.string.are_you_sure_to_delete_unsaved_places)
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        clearCache();
+                    }
+                })
+                .setNegativeButton(R.string.no, null)
+                .create().show();
+    }
+
+    private void clearCache() {
+        for (File f : mDisplayUnsavedFiles) {
+            f.delete();
+        }
+        this.dataList.clear();
+        this.adapter.notifyDataSetChanged();
+    }
+
+
+    @Override
+    public void onItemClicked(int index) {
+        try {
+            File selectedFile = this.mDisplayUnsavedFiles.get(index);
+            Log.d(TAG, String.format("Selected Item [%s] %s", index, selectedFile.getName()));
+            // start next
+            Intent intent = new Intent(this, TempTravelInfo.class);
+            intent.putExtra(TempTravelInfo.FILE_NAME_INFO, selectedFile.getName());
+            startActivity(intent);
+        } catch (Exception ex) {
+            ToastAdapter.show(getApplicationContext(), "Cannot Display", ToastAdapter.ERROR);
         }
     }
 

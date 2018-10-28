@@ -11,21 +11,16 @@ import android.util.Log;
 import com.jhmvin.places.feature.location.LocationClient;
 import com.jhmvin.places.feature.location.LocationInfoToken;
 import com.jhmvin.places.feature.location.LocationServiceController;
-import com.jhmvin.places.feature.tempTravel.TempTravelWriter;
+import com.jhmvin.places.feature.tempTravel.TempTravelCacheService;
 import com.jhmvin.places.feature.tempTravel.TempTravelFooterBean;
 import com.jhmvin.places.feature.tempTravel.TempTravelHeaderBean;
 import com.jhmvin.places.feature.tempTravel.TempTravelLocationBean;
-import com.jhmvin.places.persistence.text.TextWriter;
 import com.jhmvin.places.util.ToastAdapter;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
 
 public class PlacesMainService extends Service implements Standby, LocationClient.OnLocationObtained {
     private final static String TAG = PlacesMainService.class.getCanonicalName();
@@ -108,6 +103,10 @@ public class PlacesMainService extends Service implements Standby, LocationClien
      * Controls the location service.
      */
     private LocationServiceController locationServiceController;
+    /**
+     * Location Cache.
+     */
+    private TempTravelCacheService mTempTravelCache;
 
     private void startLocationService(Intent intent) {
         if (locationServiceController != null) {
@@ -115,36 +114,17 @@ public class PlacesMainService extends Service implements Standby, LocationClien
         }
         locationServiceController = new LocationServiceController(this, intent);
         locationServiceController.startService();
-        // experimental block
-        //
-        //
-        //
-        //
-        //
-        // Save The File Name
+        // cache
+        // get token
         LocationInfoToken token = locationServiceController.getToken();
-        this.fileName = String.valueOf(token.getTimeStarted());
-        // create the instance once
-        this.createTextWriterInstance();
-
-        try {
-
-
-            TempTravelHeaderBean header = new TempTravelHeaderBean();
-            header.setStartPlace(token.getPlaceToStart());
-            header.setEndPlace(token.getPlaceToEnd());
-            header.setStartTime(token.getTimeStarted());
-            // open
-            this.tempTravelLocationWriter.open();
-            // write something
-            this.tempTravelLocationWriter.write(header.toTempCSV());
-            this.tempTravelLocationWriter.close();
-        } catch (IOException e) {
-            ToastAdapter.show(getApplicationContext(), "Cannot initialize writer.", ToastAdapter.ERROR);
-            // incase of erro close the writer.
-            this.destroyWriter();
-        }
-
+        // create instance
+        mTempTravelCache = new TempTravelCacheService(this, String.valueOf(token.getTimeStarted()));
+        // create header from token.
+        TempTravelHeaderBean header = new TempTravelHeaderBean();
+        header.setStartPlace(token.getPlaceToStart());
+        header.setEndPlace(token.getPlaceToEnd());
+        header.setStartTime(token.getTimeStarted());
+        mTempTravelCache.write(header.toTempCSV());
     }
 
     private void stopLocationService() {
@@ -153,7 +133,15 @@ public class PlacesMainService extends Service implements Standby, LocationClien
             locationServiceController = null;
         }
         //
-        this.closeWriter();
+        if (mTempTravelCache != null) {
+            mTempTravelCache.persistCache();
+            TempTravelFooterBean footer = new TempTravelFooterBean();
+            footer.setEndedTime(System.currentTimeMillis());
+            mTempTravelCache.write("\n" + footer.toTempCSV());
+            mTempTravelCache.stopService(); // release all resources
+            mTempTravelCache = null;
+        }
+
     }
 
     //----------------------------------------------------------------------------------------------
@@ -172,7 +160,7 @@ public class PlacesMainService extends Service implements Standby, LocationClien
     public void onLocationObtained(Location location) {
         // experimental
         TempTravelLocationBean locationBean = new TempTravelLocationBean(location);
-        this.writeLocation(locationBean);
+        mTempTravelCache.cache(locationBean);
 
         // real
         if (!isStandby()) {
@@ -183,7 +171,7 @@ public class PlacesMainService extends Service implements Standby, LocationClien
             locMessage.setAccuracy(locationBean.getAccuracy());
             locMessage.setTime(locationBean.getTime());
 
-            locMessage.setCount(this.locationCompleteCache.size());
+            locMessage.setCount(mTempTravelCache.getLocationCount());
 
             EventBus.getDefault().post(locMessage);
         } else {
@@ -223,106 +211,6 @@ public class PlacesMainService extends Service implements Standby, LocationClien
     public void onCreate() {
         super.onCreate();
         ToastAdapter.show(getApplicationContext(), "[Service Started]: " + new SimpleDateFormat("hh:mm:ss a").format(new Date()));
-    }
-
-    //----------------------------------------------------------------------------------------------
-    // Temp Writing Concept Block
-    //----------------------------------------------------------------------------------------------
-
-    /**
-     * Text Writer Instance.
-     */
-    private TextWriter tempTravelLocationWriter;
-    /**
-     * The File name.
-     */
-    private String fileName;
-    /**
-     * Contains temporary location.
-     */
-    private ArrayList<TempTravelLocationBean> locationCache;
-    private List<TempTravelLocationBean> locationCompleteCache;
-
-
-    private void createTextWriterInstance() {
-        this.tempTravelLocationWriter = new TempTravelWriter(this, this.fileName);
-        this.locationCache = new ArrayList<>();
-        this.locationCompleteCache = new LinkedList<>();
-    }
-
-    private void destroyWriter() {
-        if (this.tempTravelLocationWriter != null) {
-            try {
-                this.tempTravelLocationWriter.close();
-            } catch (IOException e) {
-                Log.e(TAG, "Cannot Close Error Writer: " + e.getLocalizedMessage());
-            }
-        }
-
-        this.tempTravelLocationWriter = null;
-
-    }
-
-    private void writeLocation(TempTravelLocationBean location) {
-        this.locationCompleteCache.add(location);
-
-        if (tempTravelLocationWriter != null) {
-            if (locationCache != null) {
-                if (location != null) {
-                    // here
-                    this.locationCache.add(location);
-                    if (locationCache.size() >= 3) {
-                        this.writeToFile();
-                    }
-                }
-            }
-        } else {
-            ToastAdapter.show(getApplicationContext(), "Writing Disabled", ToastAdapter.WARNING);
-        }
-    }
-
-    private void writeToFile() {
-        if (this.locationCache != null) {
-            try {
-                if (this.tempTravelLocationWriter != null) {
-                    // open the writer.
-                    this.tempTravelLocationWriter.open();
-
-                    for (TempTravelLocationBean loc : locationCache) {
-                        this.tempTravelLocationWriter.write("\n" + loc.toTempCSV());
-                    }
-                    // close
-                    this.tempTravelLocationWriter.close();
-
-                    // clear the list
-                    this.locationCache.clear();
-                    ToastAdapter.show(getApplicationContext(), "Write Success [" + String.valueOf(this.locationCache.size()) + "]", ToastAdapter.SUCCESS);
-                }
-            } catch (IOException e) {
-                ToastAdapter.show(getApplicationContext(), "Write Error", ToastAdapter.ERROR);
-                this.destroyWriter();
-            }
-        }
-    }
-
-    private void closeWriter() {
-        if (this.tempTravelLocationWriter != null) {
-            this.writeToFile();
-            try {
-                this.tempTravelLocationWriter.open();
-                TempTravelFooterBean footer = new TempTravelFooterBean();
-                footer.setEndedTime(System.currentTimeMillis());
-                this.tempTravelLocationWriter.write("\n" + footer.toTempCSV());
-                this.tempTravelLocationWriter.close();
-                this.destroyWriter();
-                this.locationCache = null;
-                this.locationCompleteCache.clear();
-                this.locationCompleteCache = null;
-            } catch (IOException e) {
-                ToastAdapter.show(getApplicationContext(), "TextWriterSaving Error", ToastAdapter.ERROR);
-                this.destroyWriter();
-            }
-        }
     }
 
 

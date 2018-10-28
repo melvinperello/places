@@ -81,7 +81,12 @@ public class TempTravelLocationBean implements TempCSVTranslation {
 
     @Override
     public void fromTempCSV(String csvString) {
-
+        String[] split = csvString.split(",");
+        this.longitude = Double.parseDouble(split[0]);
+        this.latitude = Double.parseDouble(split[1]);
+        this.speed = Float.parseFloat(split[2]);
+        this.accuracy = Float.parseFloat(split[3]);
+        this.time = Long.parseLong(split[4]);
     }
 
     /**
