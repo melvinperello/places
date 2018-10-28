@@ -1,14 +1,17 @@
 package com.jhmvin.places;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
 import com.jhmvin.places.feature.location.LocationInfoToken;
 import com.jhmvin.places.service.LocationServiceUpdateMessage;
 import com.jhmvin.places.service.PlacesMainService;
+import com.jhmvin.places.util.TimeTool;
 import com.jhmvin.places.util.ToastAdapter;
 
 import org.greenrobot.eventbus.EventBus;
@@ -61,6 +64,9 @@ public class TempTravelRunning extends AppCompatActivity {
     // Elapsed time counter.
     private Handler mElapsedTimeHandler;
     private Runnable mElapsedTimeHandlerCallback;
+
+
+    private final DecimalFormat decimalFormat = new DecimalFormat("#,##0.00");
 
 
     @Override
@@ -123,6 +129,20 @@ public class TempTravelRunning extends AppCompatActivity {
 
     @OnClick(R.id.btnStopTravel)
     public void onClickBtnStopTravel() {
+        new AlertDialog.Builder(this)
+                .setMessage("Is this the end of your journey ?")
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        onStopTravel();
+                    }
+                })
+                .setNegativeButton(R.string.no, null)
+                .create()
+                .show();
+    }
+
+    private void onStopTravel() {
         Intent startTravelService = new Intent(this, PlacesMainService.class);
         startTravelService.setAction(PlacesMainService.ACTION_TRAVEL_STOP);
         startService(startTravelService);
@@ -175,7 +195,7 @@ public class TempTravelRunning extends AppCompatActivity {
 
     private void updateLocationUI(LocationServiceUpdateMessage locationReceivedMessage) {
         this.mLastLocation = locationReceivedMessage;
-        DecimalFormat decimalFormat = new DecimalFormat("#,##0.00");
+
         double speed = (double) locationReceivedMessage.getSpeed();
         double accuracy = (double) locationReceivedMessage.getAccuracy();
 
@@ -217,7 +237,7 @@ public class TempTravelRunning extends AppCompatActivity {
         mElapsedTimeHandlerCallback = new Runnable() {
             @Override
             public void run() {
-                tvTimeElapse.setText(getElapsedTimeString(startedMills));
+                tvTimeElapse.setText(TimeTool.getReadableElapsedTimeFrom(startedMills));
                 mElapsedTimeHandler.postDelayed(this, 1000);
             }
         };
@@ -232,25 +252,6 @@ public class TempTravelRunning extends AppCompatActivity {
             mElapsedTimeHandler = null;
         }
 
-    }
-
-    private String getElapsedTimeString(long startedMills) {
-        String time = "";
-        long elapseTime = System.currentTimeMillis() - startedMills;
-        long seconds = elapseTime / 1000;
-
-        long hours = seconds / 3600;
-        long minutes = (seconds / 60) % 60;
-        long sec = seconds % 60;
-        time = sec + " sec";
-        if (minutes != 0) {
-            time = minutes + " min " + time;
-        }
-
-        if (hours != 0) {
-            time = hours + " hr " + time;
-        }
-        return time;
     }
 
 

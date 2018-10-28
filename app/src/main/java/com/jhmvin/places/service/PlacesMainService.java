@@ -1,16 +1,21 @@
 package com.jhmvin.places.service;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
+import com.jhmvin.places.R;
 import com.jhmvin.places.feature.location.LocationClient;
 import com.jhmvin.places.feature.location.LocationInfoToken;
 import com.jhmvin.places.feature.location.LocationServiceController;
+import com.jhmvin.places.feature.notification.NotificationService;
 import com.jhmvin.places.feature.tempTravel.TempTravelCacheService;
 import com.jhmvin.places.feature.tempTravel.TempTravelFooterBean;
 import com.jhmvin.places.feature.tempTravel.TempTravelHeaderBean;
@@ -69,6 +74,20 @@ public class PlacesMainService extends Service implements Standby, LocationClien
         return this.mStandbyEnabled;
     }
 
+
+    //----------------------------------------------------------------------------------------------
+    // Creation.
+    //----------------------------------------------------------------------------------------------
+
+    private NotificationService notificationService;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        // create notification service.
+        notificationService = new NotificationService(this);
+    }
+
     //----------------------------------------------------------------------------------------------
     // Binding Section.
     //----------------------------------------------------------------------------------------------
@@ -108,7 +127,18 @@ public class PlacesMainService extends Service implements Standby, LocationClien
      */
     private TempTravelCacheService mTempTravelCache;
 
+
     private void startLocationService(Intent intent) {
+        // create notification service.
+        Notification foregroundNotification = this.notificationService.createForegroundNotification();
+        // show on foreground.
+        this.notificationService
+                .getNotificationManager()
+                .notify(NotificationService.ID_FOREGROUND, foregroundNotification);
+        // put service on foreground.
+        startForeground(NotificationService.ID_FOREGROUND, foregroundNotification);
+
+
         if (locationServiceController != null) {
             locationServiceController.stopService();
         }
@@ -141,6 +171,9 @@ public class PlacesMainService extends Service implements Standby, LocationClien
             mTempTravelCache.stopService(); // release all resources
             mTempTravelCache = null;
         }
+
+        // remove service from foreground
+        stopForeground(true);
 
     }
 
@@ -196,6 +229,17 @@ public class PlacesMainService extends Service implements Standby, LocationClien
                     setStanbyEnabled(true);
                 }
             }
+        } else {
+            // null intent
+            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setContentTitle("Service Recreated")
+                    .setContentText("The service was killed.")
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+            // notificationId is a unique int for each notification that you must define
+            notificationManager.notify(1, mBuilder.build());
         }
         return START_STICKY;
     }
@@ -205,12 +249,6 @@ public class PlacesMainService extends Service implements Standby, LocationClien
     public void onDestroy() {
         super.onDestroy();
         ToastAdapter.show(getApplicationContext(), "[Service Destroyed]: " + new SimpleDateFormat("hh:mm:ss a").format(new Date()));
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        ToastAdapter.show(getApplicationContext(), "[Service Started]: " + new SimpleDateFormat("hh:mm:ss a").format(new Date()));
     }
 
 
