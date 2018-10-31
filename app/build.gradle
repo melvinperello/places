@@ -1,8 +1,8 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 
 configurations.all {
-
-
 
 //    resolutionStrategy {
 //        // 2018/09/29 "com.google.android.gms:play-services-location:15.0.1"
@@ -49,7 +49,9 @@ dependencies {
     // Support 28.0.0-rc02
     implementation "com.android.support:appcompat-v7:${versions.supportLibrary}"
     //
-    implementation("com.android.support:support-media-compat:${versions.supportLibrary}") { force = true }
+    implementation("com.android.support:support-media-compat:${versions.supportLibrary}") {
+        force = true
+    }
     implementation("com.android.support:support-v4:${versions.supportLibrary}") { force = true }
     // recycler
     implementation "com.android.support:recyclerview-v7:${versions.supportLibrary}"
@@ -82,8 +84,12 @@ dependencies {
     //http://www.android-graphview.org/download-getting-started/
     implementation 'com.jjoe64:graphview:4.2.2'
 
+    // mikepenz material drawer
     implementation "com.mikepenz:materialdrawer:6.0.9"
-    //required support lib modules
+    implementation 'com.mikepenz:fontawesome-typeface:5.3.1.1@aar' //fa
+    // medyo about page
+    implementation 'com.github.medyo:android-about-page:1.2.4'
 
 
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }

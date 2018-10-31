@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ActivityHome">
+    tools:context=".HomeActivity">
 
     <!-- Toolbar coloring theme info: https://stackoverflow.com/questions/33339043/how-to-change-color-of-toolbar-back-button-in-android -->
     <android.support.v7.widget.Toolbar

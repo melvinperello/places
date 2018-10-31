@@ -3,6 +3,7 @@ package com.jhmvin.places;
 import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -13,54 +14,85 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
+import com.jhmvin.places.ui.CustomSupportToolbarActivity;
+import com.jhmvin.places.ui.HomeNavDrawer;
 import com.mikepenz.materialdrawer.Drawer;
-import com.mikepenz.materialdrawer.DrawerBuilder;
-import com.mikepenz.materialdrawer.model.DividerDrawerItem;
-import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
-import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
 import butterknife.ButterKnife;
 
-public class ActivityHome extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity implements CustomSupportToolbarActivity {
 
-    public final static String TAG = ActivityHome.class.getCanonicalName();
+    public final static String TAG = HomeActivity.class.getCanonicalName();
+
+    @Override
+    public Toolbar getCustomSupportToolbar() {
+        return mCustomSupportToolbar;
+    }
+
+    /**
+     * The drawer instance.
+     */
+    private Drawer mHomeDrawer;
+    /**
+     * Toolbar Instance.
+     */
+    private Toolbar mCustomSupportToolbar;
+
+    /**
+     * Loads the custom toolbar.
+     */
+    private void loadCustomToolbar() {
+        // create custom toolbar
+        this.mCustomSupportToolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(this.mCustomSupportToolbar);
+        getSupportActionBar().setTitle(R.string.places);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         ButterKnife.bind(this);
-        Toolbar toolbar =  (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Places");
+        this.loadCustomToolbar();
 
-
-        //if you want to update the items at a later time it is recommended to keep it in a variable
-        PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName("Home");
-        SecondaryDrawerItem item2 = new SecondaryDrawerItem().withIdentifier(2).withName("Settings");
-        //create the drawer and remember the `Drawer` result object
-
-        Drawer result = new DrawerBuilder()
-                .withActivity(this)
-                .withToolbar(toolbar)
-                .addDrawerItems(
-                        item1,
-                        new DividerDrawerItem(),
-                        item2,
-                        new SecondaryDrawerItem().withName("Item Seettings")
-                )
-                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+        mHomeDrawer = HomeNavDrawer
+                .build(this, new Drawer.OnDrawerItemClickListener() {
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                        new AlertDialog.Builder(ActivityHome.this)
-                                .setMessage("Hello")
-                                .setPositiveButton("Hi", null)
-                                .create().show();
+                        switch (position) {
+                            case HomeNavDrawer.ITEM_SETTINGS:
+                                mHomeDrawer.closeDrawer();
+                                new AlertDialog.Builder(HomeActivity.this)
+                                        .setMessage("Settings")
+                                        .setPositiveButton("OK", null)
+                                        .create().show();
+                                mHomeDrawer.closeDrawer();
+                                break;
+                            case HomeNavDrawer.ITEM_ABOUT:
+                                mHomeDrawer.closeDrawer();
+                                Intent about = new Intent(HomeActivity.this, AboutActivity.class);
+                                startActivity(about);
+
+                                break;
+                            case HomeNavDrawer.ITEM_EXIT:
+                                mHomeDrawer.closeDrawer();
+                                new AlertDialog.Builder(HomeActivity.this)
+                                        .setMessage("Are you sure you want to exit?")
+                                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                HomeActivity.this.finish();
+                                            }
+                                        })
+                                        .setNegativeButton("No", null)
+                                        .create().show();
+                                break;
+                        }
                         return true;
                     }
-                })
-                .build();
+                });
+
 
     }
 
@@ -123,4 +155,6 @@ public class ActivityHome extends AppCompatActivity {
                     .create().show();
         }
     }
+
+
 }
