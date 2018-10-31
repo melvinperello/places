@@ -14,8 +14,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:replace="android:icon">
-
+        tools:replace="android:icon"
+        >
         <!--
             Sugar ORM Meta Data.
             tool:replace is also conflict for Sugar ORM
@@ -41,19 +41,31 @@
         <activity android:name=".StartTracking" />
         <activity android:name=".TrackingLocation" />
         <activity android:name=".MainActivity" />
-        <activity android:name=".Places">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        <activity android:name=".Places" />
         <activity android:name=".TempTravelNew" />
         <activity android:name=".TempTravelRunning" />
         <activity android:name=".TempTravelView" />
         <activity android:name=".PlacesViewStream" />
         <activity android:name=".PlacesMarkerNew" />
-        <activity android:name=".TempTravelInfo"></activity>
+        <activity android:name=".TempTravelInfo" />
+        <activity
+            android:name=".ActivityHome"
+            android:launchMode="singleTop"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
     </application>
 
 </manifest>

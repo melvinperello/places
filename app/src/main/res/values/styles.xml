@@ -12,9 +12,24 @@
         <item name="coordinatorLayoutStyle">@style/Widget.Support.CoordinatorLayout</item>
         <item name="bottomNavigationStyle">@style/Widget.Design.BottomNavigationView</item>
         -->
-        <!-- ahbottomnavigation -->
+        <!-- ahbottomnavigation
         <item name="android:windowTranslucentNavigation">true</item>
         <item name="android:fitsSystemWindows">true</item>
+         -->
+    </style>
+
+    <style name="AppTheme.NoActionBar" parent="AppTheme">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+
+
+        <!-- android:textColorPrimary is the  color of the title text
+      in the Toolbar, in the Theme.AppCompat theme:
+      <item name="android:textColorPrimary">#FFFFFF</item>-->
+
+        <!-- Customize color of navigation drawer icon and back arrow
+        <item name="colorControlNormal">#FFFFFF</item>-->
+
     </style>
 
 

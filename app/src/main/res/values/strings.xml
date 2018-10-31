@@ -16,6 +16,7 @@
     <string name="yes">Yes</string>
     <string name="delete">Delete</string>
     <string name="delete_forever_without_saving">Delete this record forever ?</string>
+    <string name="search_places">Search places . . .</string>
 
 
 </resources>
