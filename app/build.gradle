@@ -26,11 +26,11 @@ android {
     compileSdkVersion 28
     defaultConfig {
         vectorDrawables.useSupportLibrary = true // allow use of vector drawables
-        applicationId "com.jhmvin.places"
+        applicationId "com.melvinperello.places"
         minSdkVersion 19
         targetSdkVersion 28
         versionCode 1
-        versionName "zero-build-v0.1"
+        versionName "zero-make-v0.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -90,6 +90,7 @@ dependencies {
     // medyo about page
     implementation 'com.github.medyo:android-about-page:1.2.4'
 
-
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    // fab speed dial https://github.com/leinardi/FloatingActionButtonSpeedDial
+    implementation "com.leinardi.android:speed-dial:2.0.0"
 }
