@@ -18,6 +18,7 @@ import com.leinardi.android.speeddial.SpeedDialView;
 import com.melvinperello.places.ui.CustomSupportToolbarActivity;
 import com.melvinperello.places.ui.HomeFabSpeedDial;
 import com.melvinperello.places.ui.HomeNavDrawer;
+import com.melvinperello.places.util.ToastAdapter;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
@@ -55,6 +56,7 @@ public class HomeActivity extends AppCompatActivity implements CustomSupportTool
         this.mCustomSupportToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(this.mCustomSupportToolbar);
     }
+
 
     private final Drawer.OnDrawerItemClickListener mOnDrawerClick = new OnDrawerClick();
 
@@ -109,9 +111,15 @@ public class HomeActivity extends AppCompatActivity implements CustomSupportTool
             @Override
             public boolean onActionSelected(SpeedDialActionItem actionItem) {
                 switch (actionItem.getId()) {
-                    case R.id.fabSpeedDialJourney:
+                    case R.id.fabiPlace:
+                        startActivity(new Intent(HomeActivity.this, PlaceNewActivity.class));
+                        return false;
+                    case R.id.fabiTravel:
                         Intent i = new Intent(HomeActivity.this, Places.class);
                         startActivity(i);
+                        return false;
+                    case R.id.fabiWander:
+                        ToastAdapter.show(getApplicationContext(), "Wander");
                         return false;
                     default:
                         return false;
@@ -134,7 +142,6 @@ public class HomeActivity extends AppCompatActivity implements CustomSupportTool
         this.makeHomeDrawer();
         this.makeSpeedDial();
         this.addSpeedDialActions();
-
 
 
     }

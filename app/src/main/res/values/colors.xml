@@ -8,6 +8,7 @@
     <color name="textBlack">#323232</color>
 
 
-    <color name="fabSpeedDialGreen">#2e7d32</color>
-    <color name="fabSpeedDialBlue">#1565c0</color>
+    <color name="fabiColorGreen">#2e7d32</color>
+    <color name="fabiColorBlue">#1565c0</color>
+    <color name="fabiColorRed">#d32f2f</color>
 </resources>

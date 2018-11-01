@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="fabSpeedDialJourney" type="id" />
-    <item name="fabSpeedDialDiscovery" type="id" />
+    <item name="fabiWander" type="id" />
+    <item name="fabiTravel" type="id" />
+    <item name="fabiPlace" type="id" />
 </resources>
