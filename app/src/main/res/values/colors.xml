@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- default color name -->
     <color name="colorPrimary">#546e7a</color>
     <color name="colorPrimaryDark">#29434e</color>
     <color name="colorAccent">#819ca9</color>
+    <!--
+    <color name="colorPrimary">#ff8868</color>
+    <color name="colorPrimaryDark">#ff6d46</color>
+    <color name="colorAccent">#feae67</color>
+    -->
 
-
+    <!-- text colors -->
     <color name="textBlack">#323232</color>
 
-
+    <!-- extended colors -->
     <color name="fabiColorGreen">#2e7d32</color>
     <color name="fabiColorBlue">#1565c0</color>
     <color name="fabiColorRed">#d32f2f</color>
