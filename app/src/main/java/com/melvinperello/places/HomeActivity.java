@@ -65,6 +65,13 @@ public class HomeActivity extends AppCompatActivity implements CustomSupportTool
         @Override
         public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
             switch ((int) drawerItem.getIdentifier()) {
+                case HomeNavDrawer.ITEM_PLACE:
+                    mHomeDrawer.closeDrawer();
+                    //
+                    Intent places = new Intent(HomeActivity.this, PlacesAllActivity.class);
+                    startActivity(places);
+                    break;
+
                 case HomeNavDrawer.ITEM_SETTINGS:
                     mHomeDrawer.closeDrawer();
                     new AlertDialog.Builder(HomeActivity.this)
@@ -137,7 +144,7 @@ public class HomeActivity extends AppCompatActivity implements CustomSupportTool
         ButterKnife.bind(this);
         this.makeCustomToolbar();
         // set title.
-        getSupportActionBar().setTitle(R.string.places);
+        getSupportActionBar().setTitle("Happenings");
         //
         this.makeHomeDrawer();
         this.makeSpeedDial();
