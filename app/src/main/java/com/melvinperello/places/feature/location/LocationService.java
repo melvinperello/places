@@ -1,10 +1,12 @@
 package com.melvinperello.places.feature.location;
 
 import android.content.Context;
-import android.location.Location;
 import android.util.Log;
 
-public class LocationService implements LocationClient.OnLocationObtained {
+/**
+ * Location Service.
+ */
+public class LocationService {
 
 
     public final static String TAG = LocationService.class.getCanonicalName();
@@ -18,11 +20,14 @@ public class LocationService implements LocationClient.OnLocationObtained {
      */
     private final Context mContext;
 
+    private final LocationClient.OnLocationObtained mCallback;
+
     /**
      * @param context must be an application context that implements OnLocationUpdateMessageCreated.
      */
-    public LocationService(Context context) {
+    public LocationService(Context context, LocationClient.OnLocationObtained callback) {
         mContext = context;
+        mCallback = callback;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -38,7 +43,7 @@ public class LocationService implements LocationClient.OnLocationObtained {
         this.stopService();
         // start service
         mLocationClient = new GoogleFusedLocationClient(mContext);
-        mLocationClient.setLocationCallback(this);
+        mLocationClient.setLocationCallback(mCallback);
         mLocationClient.startLocationAwareness();
         Log.d(TAG, "Location service started.");
         // create cache
@@ -57,19 +62,6 @@ public class LocationService implements LocationClient.OnLocationObtained {
             Log.d(TAG, "Location Client was cleared.");
         }
         Log.d(TAG, "Location service was stopped..");
-
-    }
-
-
-    /**
-     * When a location was obtained.
-     *
-     * @param location
-     */
-    @Override
-    public void onLocationObtained(Location location) {
-        // send the call back chain to the service.
-        ((LocationClient.OnLocationObtained) (this.mContext)).onLocationObtained(location);
     }
 
 

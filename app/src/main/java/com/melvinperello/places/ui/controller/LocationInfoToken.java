@@ -1,4 +1,4 @@
-package com.melvinperello.places.feature.location;
+package com.melvinperello.places.ui.controller;
 
 public class LocationInfoToken {
 

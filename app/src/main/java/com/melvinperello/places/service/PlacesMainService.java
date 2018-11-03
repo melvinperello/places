@@ -13,9 +13,9 @@ import android.util.Log;
 
 import com.melvinperello.places.R;
 import com.melvinperello.places.feature.location.LocationClient;
-import com.melvinperello.places.feature.location.LocationInfoToken;
-import com.melvinperello.places.feature.location.LocationServiceController;
-import com.melvinperello.places.feature.notification.NotificationService;
+import com.melvinperello.places.ui.controller.LocationInfoToken;
+import com.melvinperello.places.ui.controller.LocationServiceController;
+import com.melvinperello.places.ui.notification.NotificationService;
 import com.melvinperello.places.feature.tempTravel.TempTravelCacheService;
 import com.melvinperello.places.feature.tempTravel.TempTravelFooterBean;
 import com.melvinperello.places.feature.tempTravel.TempTravelHeaderBean;

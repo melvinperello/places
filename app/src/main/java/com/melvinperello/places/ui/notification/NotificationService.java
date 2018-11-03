@@ -1,4 +1,4 @@
-package com.melvinperello.places.feature.notification;
+package com.melvinperello.places.ui.notification;
 
 import android.app.Notification;
 import android.app.PendingIntent;

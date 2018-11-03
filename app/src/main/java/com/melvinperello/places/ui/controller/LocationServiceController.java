@@ -1,9 +1,11 @@
-package com.melvinperello.places.feature.location;
+package com.melvinperello.places.ui.controller;
 
 import android.content.Context;
 import android.content.Intent;
 
 import com.melvinperello.places.TempTravelNew;
+import com.melvinperello.places.feature.location.LocationClient;
+import com.melvinperello.places.feature.location.LocationService;
 import com.melvinperello.places.util.ToastAdapter;
 
 /**
@@ -47,7 +49,7 @@ public class LocationServiceController {
         this.mToken = createLocationToken();
 
         if (mLocationService == null) {
-            mLocationService = new LocationService(mServiceContext);
+            mLocationService = new LocationService(mServiceContext, (LocationClient.OnLocationObtained) mServiceContext);
         }
         mLocationService.startService();
         mToken.setStarted(true);

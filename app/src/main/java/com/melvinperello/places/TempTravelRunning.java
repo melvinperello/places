@@ -8,7 +8,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
-import com.melvinperello.places.feature.location.LocationInfoToken;
+import com.melvinperello.places.ui.controller.LocationInfoToken;
 import com.melvinperello.places.service.LocationServiceUpdateMessage;
 import com.melvinperello.places.service.PlacesMainService;
 import com.melvinperello.places.util.TimeTool;

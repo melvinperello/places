@@ -12,9 +12,16 @@
 
     <!-- text colors -->
     <color name="textBlack">#323232</color>
+    <color name="textWhite">#FFFFFF</color>
 
     <!-- extended colors -->
     <color name="fabiColorGreen">#2e7d32</color>
     <color name="fabiColorBlue">#1565c0</color>
     <color name="fabiColorRed">#d32f2f</color>
+
+
+    <color name="placesGreen">#52C95A</color>
+    <color name="placesRed">#FF6868</color>
+    <color name="placesBlue">#506CAB</color>
+
 </resources>
