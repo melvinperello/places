@@ -15,7 +15,11 @@ import com.google.android.gms.location.LocationServices;
 /**
  * Google Fused Location Client.
  */
-public class GoogleFusedLocationClient implements LocationClient {
+public class GoogleFusedLocationClient implements LocationAware {
+
+    private long intervalInternal = 5000;
+    private long intervalExternal = 3000;
+
 
     /**
      * Service Context.
@@ -70,6 +74,8 @@ public class GoogleFusedLocationClient implements LocationClient {
      */
     @Override
     public void startLocationAwareness() {
+        this.stopLocationAwareness();
+
         this.mGoogleFusedLocationClient = LocationServices.getFusedLocationProviderClient(this.mContext);
         if (ActivityCompat.checkSelfPermission(this.mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -85,8 +91,8 @@ public class GoogleFusedLocationClient implements LocationClient {
         this.mGoogleFusedLocationClient.requestLocationUpdates(
                 LocationRequest.create()
                         .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                        .setInterval(5000)
-                        .setFastestInterval(3000)
+                        .setInterval(intervalInternal)
+                        .setFastestInterval(intervalExternal)
                 , mGoogleCallback, null
         );
         mLocationAwareness = true;
@@ -104,10 +110,6 @@ public class GoogleFusedLocationClient implements LocationClient {
         if (this.mGoogleFusedLocationClient != null) {
             // remove google call back
             this.mGoogleFusedLocationClient.removeLocationUpdates(mGoogleCallback);
-            // unset user callback
-            this.mUserDefinedCallback = null;
-            // unset the client.
-            this.mGoogleFusedLocationClient = null;
         }
 
         mLocationAwareness = false;
@@ -116,5 +118,15 @@ public class GoogleFusedLocationClient implements LocationClient {
     @Override
     public boolean isLocationAware() {
         return mLocationAwareness;
+    }
+
+    @Override
+    public void setLocationInternalInterval(long interval) {
+        this.intervalInternal = interval;
+    }
+
+    @Override
+    public void setLocationExternalInterval(long interval) {
+        this.intervalExternal = interval;
     }
 }

@@ -1,11 +1,16 @@
 package com.melvinperello.places;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import com.melvinperello.places.feature.location.GoogleFusedLocationClient;
+import com.melvinperello.places.feature.location.LocationAware;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -15,7 +20,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class PlaceNewActivity extends AppCompatActivity {
+public class PlaceNewActivity extends AppCompatActivity implements LocationAware.OnLocationObtained {
 
 
     @BindView(R.id.tvDateDay)
@@ -39,6 +44,13 @@ public class PlaceNewActivity extends AppCompatActivity {
     @BindView(R.id.edtNotes)
     EditText edtNotes;
 
+
+
+    private ProgressDialog mProgressDialog;
+
+
+    private LocationAware mLocationAwarenessClient;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +61,17 @@ public class PlaceNewActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         setTime(System.currentTimeMillis());
+        mLocationAwarenessClient = new GoogleFusedLocationClient(this);
+        mLocationAwarenessClient.setLocationCallback(this);
+        this.getLocation();
+    }
+
+
+
+    private void getLocation() {
+        mLocationAwarenessClient.startLocationAwareness();
+        mProgressDialog = ProgressDialog.show(this, "",
+                "Loading. Please wait...", true);
     }
 
 
@@ -108,5 +131,14 @@ public class PlaceNewActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         askToDiscard();
         return true;
+    }
+
+    @Override
+    public void onLocationObtained(Location location) {
+        mLocationAwarenessClient.stopLocationAwareness();
+        mProgressDialog.dismiss();
+        String lat = String.valueOf(location.getLatitude());
+        String lng = String.valueOf(location.getLongitude());
+        tvGeoCode.setText(lat + " , " + lng);
     }
 }

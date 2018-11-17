@@ -4,8 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.melvinperello.places.TempTravelNew;
-import com.melvinperello.places.feature.location.LocationClient;
-import com.melvinperello.places.feature.location.LocationService;
+import com.melvinperello.places.feature.location.LocationAware;
 import com.melvinperello.places.util.ToastAdapter;
 
 /**
@@ -13,9 +12,19 @@ import com.melvinperello.places.util.ToastAdapter;
  */
 public class LocationServiceController {
     private Intent mStartLocationIntent;
-    private LocationService mLocationService;
     private Context mServiceContext;
     private LocationInfoToken mToken;
+
+    /**
+     * Dependency.
+     */
+    private LocationAware mLocationAwarenessClient;
+
+
+    public void setLocationAwarenessClient(LocationAware mLocationAwarenessClient) {
+        this.mLocationAwarenessClient = mLocationAwarenessClient;
+    }
+
 
 
     /**
@@ -48,10 +57,10 @@ public class LocationServiceController {
     public void startService() {
         this.mToken = createLocationToken();
 
-        if (mLocationService == null) {
-            mLocationService = new LocationService(mServiceContext, (LocationClient.OnLocationObtained) mServiceContext);
+        if (!mLocationAwarenessClient.isLocationAware()) {
+            mLocationAwarenessClient.startLocationAwareness();
         }
-        mLocationService.startService();
+
         mToken.setStarted(true);
         ToastAdapter.show(mServiceContext.getApplicationContext(), "Travel Start Command", ToastAdapter.SUCCESS);
     }
@@ -69,11 +78,8 @@ public class LocationServiceController {
      * Stops the service.
      */
     public void stopService() {
-        if (mLocationService != null) {
-            mLocationService.stopService();
-        }
+        mLocationAwarenessClient.stopLocationAwareness();
         mToken = null;
-        mLocationService = null;
         ToastAdapter.show(mServiceContext.getApplicationContext(), "Travel Stop Command", ToastAdapter.ERROR);
     }
 

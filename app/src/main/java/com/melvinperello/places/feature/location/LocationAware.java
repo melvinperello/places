@@ -5,7 +5,7 @@ import android.location.Location;
 /**
  * Interface for location services.
  */
-public interface LocationClient {
+public interface LocationAware {
 
     /**
      * starts location service. inquires location.
@@ -30,6 +30,11 @@ public interface LocationClient {
      * @return
      */
     boolean isLocationAware();
+
+
+    void setLocationInternalInterval(long interval);
+
+    void setLocationExternalInterval(long interval);
 
 
     /**

@@ -12,7 +12,8 @@ import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
 import com.melvinperello.places.R;
-import com.melvinperello.places.feature.location.LocationClient;
+import com.melvinperello.places.feature.location.GoogleFusedLocationClient;
+import com.melvinperello.places.feature.location.LocationAware;
 import com.melvinperello.places.ui.controller.LocationInfoToken;
 import com.melvinperello.places.ui.controller.LocationServiceController;
 import com.melvinperello.places.ui.notification.NotificationService;
@@ -27,7 +28,7 @@ import org.greenrobot.eventbus.EventBus;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class PlacesMainService extends Service implements Standby, LocationClient.OnLocationObtained {
+public class PlacesMainService extends Service implements Standby, LocationAware.OnLocationObtained {
     private final static String TAG = PlacesMainService.class.getCanonicalName();
 
 
@@ -143,6 +144,11 @@ public class PlacesMainService extends Service implements Standby, LocationClien
             locationServiceController.stopService();
         }
         locationServiceController = new LocationServiceController(this, intent);
+        //
+        LocationAware locationAware = new GoogleFusedLocationClient(this);
+        locationAware.setLocationCallback(this);
+        locationServiceController.setLocationAwarenessClient(locationAware);
+        //
         locationServiceController.startService();
         // cache
         // get token
