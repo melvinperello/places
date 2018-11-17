@@ -1,13 +1,18 @@
 package com.melvinperello.places;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 
+import com.melvinperello.places.domain.Place;
 import com.melvinperello.places.domain.PlacesListItem;
+import com.melvinperello.places.persistence.db.ApplicationDatabase;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -53,13 +58,35 @@ public class PlaceViewActivity extends AppCompatActivity {
     }
 
     private void populateFakeData() {
-        for (int ctr = 0; ctr < 20; ctr++) {
-            PlacesListItem item = new PlacesListItem();
-            item.setDate("November 03, 2018 05:59 PM");
-            item.setName("SM Clark");
-            placesList.add(item);
+        new DataLoader().execute("Something");
+    }
+
+
+    private final class DataLoader extends AsyncTask<String, Void, List<PlacesListItem>> {
+
+        @Override
+        protected List<PlacesListItem> doInBackground(String... strings) {
+            ApplicationDatabase database = ApplicationDatabase
+                    .build(PlaceViewActivity.this.getApplicationContext());
+            List<Place> items = database.placeDao().allActive();
+            database.close();
+
+            List<PlacesListItem> displayItems = new LinkedList<>();
+            for (Place place : items) {
+                PlacesListItem displayItem = new PlacesListItem();
+                displayItem.setName(place.getName());
+                displayItem.setDate(String.valueOf(place.getCreatedAt()));
+                displayItems.add(displayItem);
+            }
+            return displayItems;
         }
-        // send update to adapter.
-        placesAdapter.notifyDataSetChanged();
+
+        @Override
+        protected void onPostExecute(List<PlacesListItem> placesListItems) {
+            placesList.clear();
+            placesList.addAll(placesListItems);
+            Log.i("PlaceViewActivity", "Items Received: " + placesListItems.size());
+            placesAdapter.notifyDataSetChanged();
+        }
     }
 }

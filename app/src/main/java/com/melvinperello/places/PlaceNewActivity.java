@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.melvinperello.places.annotation.RequiredComponent;
 import com.melvinperello.places.domain.Place;
 import com.melvinperello.places.feature.location.GoogleFusedLocationClient;
 import com.melvinperello.places.feature.location.LocationAware;
@@ -21,7 +22,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnTextChanged;
 
-public class PlaceNewActivity extends AppCompatActivity implements LocationAware.OnLocationObtained
+public class PlaceNewActivity extends AppCompatActivity implements
+        LocationAware.OnLocationObtained
         , StartingState {
 
     //----------------------------------------------------------------------------------------------
@@ -54,8 +56,11 @@ public class PlaceNewActivity extends AppCompatActivity implements LocationAware
     //----------------------------------------------------------------------------------------------
     // Members
     //----------------------------------------------------------------------------------------------
-    private PlaceNewActivityController mController;
+    @RequiredComponent
     private LocationAware mLocationAwarenessClient;
+    @RequiredComponent
+    private PlaceNewActivityController mController;
+
     private Location mLocationObtained;
     private long mLocationAtomicTime = 0L;
 
@@ -81,18 +86,25 @@ public class PlaceNewActivity extends AppCompatActivity implements LocationAware
         mLocationAwarenessClient.setLocationCallback(this);
         this.getLocation();
 
-
         this.startingState();
     }
 
     @Override
     public void startingState() {
-        this.disableSaveButtonInUI();
+        this.btnSave.setText("Waiting for location . . .");
+        this.disableSaveButton();
     }
 
-    private void disableSaveButtonInUI() {
-        this.btnSave.setText("Write Something . . .");
+    private void disableSaveButton() {
+        this.btnSave.setBackgroundColor(this.getResources().getColor(R.color.disabledBox));
+        this.btnSave.setTextColor(this.getResources().getColor(R.color.disabledText));
         this.btnSave.setEnabled(false);
+    }
+
+    private void enableSaveButton() {
+        this.btnSave.setBackgroundColor(this.getResources().getColor(R.color.placesGreen));
+        this.btnSave.setTextColor(this.getResources().getColor(R.color.textWhite));
+        this.btnSave.setEnabled(true);
     }
 
 
@@ -103,47 +115,7 @@ public class PlaceNewActivity extends AppCompatActivity implements LocationAware
     }
 
 
-    public final static class StringDate {
-        private String day;
-        private String dayName;
-        private String monthYear;
-        private String time;
-
-        public String getDay() {
-            return day;
-        }
-
-        public void setDay(String day) {
-            this.day = day;
-        }
-
-        public String getDayName() {
-            return dayName;
-        }
-
-        public void setDayName(String dayName) {
-            this.dayName = dayName;
-        }
-
-        public String getMonthYear() {
-            return monthYear;
-        }
-
-        public void setMonthYear(String monthYear) {
-            this.monthYear = monthYear;
-        }
-
-        public String getTime() {
-            return time;
-        }
-
-        public void setTime(String time) {
-            this.time = time;
-        }
-    }
-
-
-    private void showStringDateInUI(StringDate stringDate) {
+    private void showStringDateInUI(PlaceNewActivityController.StringDate stringDate) {
         // display time.
         tvDateDay.setText(stringDate.getDay());
         tvDateDayName.setText(stringDate.getDayName());
@@ -178,10 +150,11 @@ public class PlaceNewActivity extends AppCompatActivity implements LocationAware
     @OnTextChanged(R.id.edtName)
     public void onTextChangeEdtName() {
         if (this.mController.checkNameIfEmpty()) {
-            this.disableSaveButtonInUI();
+            this.disableSaveButton();
+            this.btnSave.setText("Write Something . . .");
         } else {
             // not empty
-            this.btnSave.setEnabled(true);
+            this.enableSaveButton();
             this.btnSave.setText("Save");
         }
     }
@@ -216,24 +189,34 @@ public class PlaceNewActivity extends AppCompatActivity implements LocationAware
     @Override
     public void onBackPressed() {
         showDiscardMessage();
+        this.stopLocationRequest();
     }
 
     @Override
     public boolean onSupportNavigateUp() {
-        showDiscardMessage();
+        onBackPressed();
         return true;
+    }
+
+    private void stopLocationRequest() {
+        if (mLocationAwarenessClient != null) {
+            if (mLocationAwarenessClient.isLocationAware()) {
+                mLocationAwarenessClient.stopLocationAwareness();
+            }
+        }
     }
 
     @Override
     public void onLocationObtained(Location location) {
-        mLocationAwarenessClient.stopLocationAwareness();
+        this.stopLocationRequest();
         this.mLocationObtained = location;
         this.mLocationAtomicTime = LocationTool.getLocationAtomicTime(mLocationObtained.getElapsedRealtimeNanos());
-        this.btnSave.setEnabled(true);
+
+        this.onTextChangeEdtName();
 
         String geoCode = mController.getGeoCodeString(this.mLocationObtained);
         this.showGeoCodeInUI(geoCode);
-        StringDate dateString = mController.getStringDate(this.mLocationAtomicTime);
+        PlaceNewActivityController.StringDate dateString = mController.getStringDate(this.mLocationAtomicTime);
         this.showStringDateInUI(dateString);
     }
 }

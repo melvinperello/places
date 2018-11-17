@@ -15,7 +15,7 @@ public interface PlaceDao {
     @Insert
     void insert(Place place);
 
-    @Query("SELECT * FROM Place WHERE deleted_at != 0")
+    @Query("SELECT * FROM Place WHERE deleted_at = 0")
     List<Place> allActive();
 
     @Update

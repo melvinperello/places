@@ -24,4 +24,8 @@
     <color name="placesRed">#FF6868</color>
     <color name="placesBlue">#506CAB</color>
 
+
+    <color name="disabledBox">#BEBEBE</color>
+    <color name="disabledText">#696969</color>
+
 </resources>
