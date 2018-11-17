@@ -1,16 +1,17 @@
-package com.melvinperello.places.persistence.db;
+package com.melvinperello.places.domain;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
 
 @Entity
 public class Place {
-
     //----------------------------------------------------------------------------------------------
     // Fields
     //----------------------------------------------------------------------------------------------
-    @PrimaryKey
+    @NonNull
+    @PrimaryKey(autoGenerate = true)
     private int id;
 
     @ColumnInfo(name = "longitude")
@@ -36,6 +37,20 @@ public class Place {
 
     @ColumnInfo(name = "deleted_at")
     private long deletedAt;
+
+    public Place() {
+        // load default values.
+        this.longitude = 0.0d;
+        this.latitude = 0.0d;
+        this.revGeoCode = null;
+        this.name = null;
+        this.note = null;
+        this.createdAt = 0x0;
+        this.updatedAt = 0x0;
+        this.deletedAt = 0x0;
+    }
+
+
     //----------------------------------------------------------------------------------------------
     // Getters
     //----------------------------------------------------------------------------------------------

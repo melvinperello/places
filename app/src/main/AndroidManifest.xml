@@ -68,7 +68,7 @@
         <activity android:name=".AboutActivity" />
         <activity android:name=".PlaceNewActivity" />
         <activity android:name=".PlaceNewActivity" />
-        <activity android:name=".PlacesAllActivity"></activity>
+        <activity android:name=".PlaceViewActivity"></activity>
     </application>
 
 </manifest>

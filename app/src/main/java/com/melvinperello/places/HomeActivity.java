@@ -68,7 +68,7 @@ public class HomeActivity extends AppCompatActivity implements CustomSupportTool
                 case HomeNavDrawer.ITEM_PLACE:
                     mHomeDrawer.closeDrawer();
                     //
-                    Intent places = new Intent(HomeActivity.this, PlacesAllActivity.class);
+                    Intent places = new Intent(HomeActivity.this, PlaceViewActivity.class);
                     startActivity(places);
                     break;
 

@@ -13,7 +13,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class PlacesAllActivity extends AppCompatActivity {
+public class PlaceViewActivity extends AppCompatActivity {
 
     @BindView(R.id.rvPlaces)
     RecyclerView rvPlaces;
@@ -25,7 +25,7 @@ public class PlacesAllActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_places_all);
+        setContentView(R.layout.activity_place_view);
         ButterKnife.bind(this);
 
 

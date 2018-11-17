@@ -1,28 +1,32 @@
 package com.melvinperello.places;
 
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.melvinperello.places.domain.Place;
 import com.melvinperello.places.feature.location.GoogleFusedLocationClient;
 import com.melvinperello.places.feature.location.LocationAware;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import com.melvinperello.places.interfaces.StartingState;
+import com.melvinperello.places.persistence.db.ApplicationDatabase;
+import com.melvinperello.places.util.LocationTool;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.OnTextChanged;
 
-public class PlaceNewActivity extends AppCompatActivity implements LocationAware.OnLocationObtained {
+public class PlaceNewActivity extends AppCompatActivity implements LocationAware.OnLocationObtained
+        , StartingState {
 
-
+    //----------------------------------------------------------------------------------------------
+    // Widgets
+    //----------------------------------------------------------------------------------------------
     @BindView(R.id.tvDateDay)
     TextView tvDateDay;
 
@@ -44,63 +48,112 @@ public class PlaceNewActivity extends AppCompatActivity implements LocationAware
     @BindView(R.id.edtNotes)
     EditText edtNotes;
 
+    @BindView(R.id.btnSave)
+    Button btnSave;
 
-
-    private ProgressDialog mProgressDialog;
-
-
+    //----------------------------------------------------------------------------------------------
+    // Members
+    //----------------------------------------------------------------------------------------------
+    private PlaceNewActivityController mController;
     private LocationAware mLocationAwarenessClient;
+    private Location mLocationObtained;
+    private long mLocationAtomicTime = 0L;
+
+    //----------------------------------------------------------------------------------------------
+    // Methods.
+    //----------------------------------------------------------------------------------------------
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_place_new);
         ButterKnife.bind(this);
-
+        // enable back button
         getSupportActionBar().setTitle(R.string.a_new_place);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        setTime(System.currentTimeMillis());
+        //
+        this.mController = new PlaceNewActivityController();
+        this.mController.setEdtName(this.edtName);
+        this.mController.setEdtNotes(this.edtNotes);
+        //
         mLocationAwarenessClient = new GoogleFusedLocationClient(this);
         mLocationAwarenessClient.setLocationCallback(this);
         this.getLocation();
+
+
+        this.startingState();
     }
 
+    @Override
+    public void startingState() {
+        this.disableSaveButtonInUI();
+    }
+
+    private void disableSaveButtonInUI() {
+        this.btnSave.setText("Write Something . . .");
+        this.btnSave.setEnabled(false);
+    }
 
 
     private void getLocation() {
         mLocationAwarenessClient.startLocationAwareness();
-        mProgressDialog = ProgressDialog.show(this, "",
-                "Loading. Please wait...", true);
+        tvGeoCode.setText("Tracking Location . . .");
+        this.btnSave.setEnabled(false);
     }
 
 
-    private void setTime(long currentTime) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(currentTime);
-        Date date = cal.getTime();
-        String day = new SimpleDateFormat("dd").format(date);
-        String dayName = new SimpleDateFormat("EEEE").format(date);
-        String monthYear = new SimpleDateFormat("MMMM yyyy").format(date).toUpperCase();
-        String time = new SimpleDateFormat("hh:mm:ss a").format(date);
+    public final static class StringDate {
+        private String day;
+        private String dayName;
+        private String monthYear;
+        private String time;
 
+        public String getDay() {
+            return day;
+        }
 
-        tvDateDay.setText(day);
-        tvDateDayName.setText(dayName);
-        tvDateMonthYear.setText(monthYear);
-        tvTime.setText(time);
+        public void setDay(String day) {
+            this.day = day;
+        }
+
+        public String getDayName() {
+            return dayName;
+        }
+
+        public void setDayName(String dayName) {
+            this.dayName = dayName;
+        }
+
+        public String getMonthYear() {
+            return monthYear;
+        }
+
+        public void setMonthYear(String monthYear) {
+            this.monthYear = monthYear;
+        }
+
+        public String getTime() {
+            return time;
+        }
+
+        public void setTime(String time) {
+            this.time = time;
+        }
     }
 
 
-    private boolean hasNoText() {
-        String name = edtName.getText().toString().trim();
-        String note = edtNotes.getText().toString().trim();
-
-        return (name.isEmpty() && note.isEmpty());
+    private void showStringDateInUI(StringDate stringDate) {
+        // display time.
+        tvDateDay.setText(stringDate.getDay());
+        tvDateDayName.setText(stringDate.getDayName());
+        tvDateMonthYear.setText(stringDate.getMonthYear());
+        tvTime.setText(stringDate.getTime());
     }
 
-    private void askToDiscard() {
-        if (hasNoText()) {
+    private void showDiscardMessage() {
+        // if no text just finish the activity.
+        if (mController.checkNameAndNoteIfEmpty()) {
             finish();
             return;
         }
@@ -117,28 +170,70 @@ public class PlaceNewActivity extends AppCompatActivity implements LocationAware
                 .create().show();
     }
 
+
+    private void showGeoCodeInUI(String geoCode) {
+        tvGeoCode.setText(geoCode);
+    }
+
+    @OnTextChanged(R.id.edtName)
+    public void onTextChangeEdtName() {
+        if (this.mController.checkNameIfEmpty()) {
+            this.disableSaveButtonInUI();
+        } else {
+            // not empty
+            this.btnSave.setEnabled(true);
+            this.btnSave.setText("Save");
+        }
+    }
+
+
     @OnClick(R.id.btnSave)
     public void onClickBtnSave() {
+
+        // create entity.
+        final Place place = new Place();
+        place.setName(edtName.getText().toString().trim());
+        place.setNote(edtNotes.getText().toString().trim());
+        place.setLatitude(mLocationObtained.getLatitude());
+        place.setLongitude(mLocationObtained.getLongitude());
+        place.setCreatedAt(mLocationAtomicTime);
+
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ApplicationDatabase database = ApplicationDatabase
+                        .build(getApplicationContext());
+                database.placeDao().insert(place);
+                database.close();
+                PlaceNewActivity.this.finish();
+            }
+        }).start();
+
 
     }
 
     @Override
     public void onBackPressed() {
-        askToDiscard();
+        showDiscardMessage();
     }
 
     @Override
     public boolean onSupportNavigateUp() {
-        askToDiscard();
+        showDiscardMessage();
         return true;
     }
 
     @Override
     public void onLocationObtained(Location location) {
         mLocationAwarenessClient.stopLocationAwareness();
-        mProgressDialog.dismiss();
-        String lat = String.valueOf(location.getLatitude());
-        String lng = String.valueOf(location.getLongitude());
-        tvGeoCode.setText(lat + " , " + lng);
+        this.mLocationObtained = location;
+        this.mLocationAtomicTime = LocationTool.getLocationAtomicTime(mLocationObtained.getElapsedRealtimeNanos());
+        this.btnSave.setEnabled(true);
+
+        String geoCode = mController.getGeoCodeString(this.mLocationObtained);
+        this.showGeoCodeInUI(geoCode);
+        StringDate dateString = mController.getStringDate(this.mLocationAtomicTime);
+        this.showStringDateInUI(dateString);
     }
 }
