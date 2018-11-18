@@ -12,11 +12,18 @@ import java.util.List;
 
 @Dao
 public interface PlaceDao {
+
     @Insert
     void insert(Place place);
 
-    @Query("SELECT * FROM Place WHERE deleted_at = 0")
+    @Query("SELECT * FROM place WHERE deleted_at = 0")
     List<Place> allActive();
+
+    @Query("SELECT * FROM place WHERE name LIKE '%' || :name  || '%'")
+    List<Place> findNameLike(String name);
+
+    @Query("SELECT * FROM place WHERE id = :id")
+    Place findById(int id);
 
     @Update
     void update(Place palce);

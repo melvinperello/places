@@ -1,15 +1,21 @@
 package com.melvinperello.places;
 
+import android.app.SearchManager;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.melvinperello.places.domain.Place;
 import com.melvinperello.places.domain.PlacesListItem;
 import com.melvinperello.places.persistence.db.ApplicationDatabase;
+import com.melvinperello.places.ui.SearchToolbarFixer;
+import com.melvinperello.places.util.ToastAdapter;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -18,10 +24,27 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class PlaceViewActivity extends AppCompatActivity {
+public class PlaceViewActivity extends AppCompatActivity implements MenuItem.OnActionExpandListener {
 
     @BindView(R.id.rvPlaces)
     RecyclerView rvPlaces;
+
+
+    /**
+     * Toolbar Instance.
+     */
+    private SearchToolbarFixer mSearchToolbarFixer;
+
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            if (!query.isEmpty()) {
+                new DataLoader().execute(DATA_NAME_LIKE, query);
+            }
+        }
+    }
 
 
     private final List<PlacesListItem> placesList = new ArrayList<>();
@@ -34,6 +57,10 @@ public class PlaceViewActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
 
+        mSearchToolbarFixer = SearchToolbarFixer.create(this)
+                .addCustomToolbar(R.id.toolbar);
+
+
         getSupportActionBar().setTitle("Your Places");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -41,6 +68,17 @@ public class PlaceViewActivity extends AppCompatActivity {
 
         this.populateFakeData();
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        mSearchToolbarFixer
+                .setMenuResource(R.menu.menu_action_search)
+                .setMenu(menu)
+                .inflate()
+                .setCloseButtonAsClear()
+                .setOnActionExpandListener(this);
+        return true;
     }
 
     @Override
@@ -57,8 +95,24 @@ public class PlaceViewActivity extends AppCompatActivity {
         rvPlaces.setAdapter(placesAdapter);
     }
 
+
+    public final static String DATA_ALL = "DATA_ALL";
+    public final static String DATA_NAME_LIKE = "DATA_NAME_LIKE";
+
     private void populateFakeData() {
-        new DataLoader().execute("Something");
+        new DataLoader().execute(DATA_ALL);
+    }
+
+    @Override
+    public boolean onMenuItemActionExpand(MenuItem item) {
+        ToastAdapter.show(getApplicationContext(), "Show");
+        return true;
+    }
+
+    @Override
+    public boolean onMenuItemActionCollapse(MenuItem item) {
+        populateFakeData();
+        return true;
     }
 
 
@@ -66,9 +120,25 @@ public class PlaceViewActivity extends AppCompatActivity {
 
         @Override
         protected List<PlacesListItem> doInBackground(String... strings) {
+            String commandType = strings[0];
+
             ApplicationDatabase database = ApplicationDatabase
                     .build(PlaceViewActivity.this.getApplicationContext());
-            List<Place> items = database.placeDao().allActive();
+            // filter
+            // init empty
+            List<Place> items = new ArrayList<>();
+            switch (commandType) {
+                case DATA_ALL:
+                    items = database.placeDao().allActive();
+                    break;
+                case DATA_NAME_LIKE:
+                    String searchQuery = strings[1];
+                    items = database.placeDao().findNameLike(searchQuery);
+                    break;
+            }
+            //
+
+
             database.close();
 
             List<PlacesListItem> displayItems = new LinkedList<>();

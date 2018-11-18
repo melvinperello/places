@@ -64,6 +64,8 @@ public class PlaceNewActivity extends AppCompatActivity implements
     private Location mLocationObtained;
     private long mLocationAtomicTime = 0L;
 
+    private boolean mFindingLocation = false;
+
     //----------------------------------------------------------------------------------------------
     // Methods.
     //----------------------------------------------------------------------------------------------
@@ -112,6 +114,7 @@ public class PlaceNewActivity extends AppCompatActivity implements
         mLocationAwarenessClient.startLocationAwareness();
         tvGeoCode.setText("Tracking Location . . .");
         this.btnSave.setEnabled(false);
+        mFindingLocation = true;
     }
 
 
@@ -149,6 +152,9 @@ public class PlaceNewActivity extends AppCompatActivity implements
 
     @OnTextChanged(R.id.edtName)
     public void onTextChangeEdtName() {
+        if (mFindingLocation) {
+            return; // do nothing
+        }
         if (this.mController.checkNameIfEmpty()) {
             this.disableSaveButton();
             this.btnSave.setText("Write Something . . .");
@@ -209,6 +215,7 @@ public class PlaceNewActivity extends AppCompatActivity implements
     @Override
     public void onLocationObtained(Location location) {
         this.stopLocationRequest();
+        mFindingLocation = false;
         this.mLocationObtained = location;
         this.mLocationAtomicTime = LocationTool.getLocationAtomicTime(mLocationObtained.getElapsedRealtimeNanos());
 
@@ -218,5 +225,6 @@ public class PlaceNewActivity extends AppCompatActivity implements
         this.showGeoCodeInUI(geoCode);
         PlaceNewActivityController.StringDate dateString = mController.getStringDate(this.mLocationAtomicTime);
         this.showStringDateInUI(dateString);
+
     }
 }
