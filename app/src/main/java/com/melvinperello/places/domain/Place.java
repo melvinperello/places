@@ -8,6 +8,10 @@ import android.support.annotation.NonNull;
 @Entity(tableName = "place")
 public class Place {
 
+    public enum Source {
+        LOCAL, GOOGLE_MAPS
+    }
+
     //----------------------------------------------------------------------------------------------
     // Fields
     //----------------------------------------------------------------------------------------------
@@ -30,6 +34,9 @@ public class Place {
     @ColumnInfo(name = "note")
     private String note;
 
+    @ColumnInfo(name = "source")
+    private String source;
+
     @ColumnInfo(name = "created_at")
     private long createdAt;
 
@@ -46,6 +53,7 @@ public class Place {
         this.revGeoCode = null;
         this.name = null;
         this.note = null;
+        this.source = null;
         this.createdAt = 0x0;
         this.updatedAt = 0x0;
         this.deletedAt = 0x0;
@@ -91,6 +99,15 @@ public class Place {
     public long getDeletedAt() {
         return deletedAt;
     }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
     //----------------------------------------------------------------------------------------------
     // Setters
     //----------------------------------------------------------------------------------------------

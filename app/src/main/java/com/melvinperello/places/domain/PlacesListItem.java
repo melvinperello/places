@@ -22,6 +22,7 @@ public class PlacesListItem {
     //----------------------------------------------------------------------------------------------
     private String date;
     private String name;
+    private String geoCode;
 
     public String getDate() {
         return date;
@@ -39,6 +40,13 @@ public class PlacesListItem {
         this.name = name;
     }
 
+    public String getGeoCode() {
+        return geoCode;
+    }
+
+    public void setGeoCode(String geoCode) {
+        this.geoCode = geoCode;
+    }
 
     //----------------------------------------------------------------------------------------------
     // 03. Data Adapter.
@@ -66,7 +74,7 @@ public class PlacesListItem {
             // inflate the view using the view group context
             // do not attach to root [last false parameter]
             View view = LayoutInflater.from(viewGroup.getContext())
-                    .inflate(R.layout.list_item_places, viewGroup, false);
+                    .inflate(R.layout.list_item_place, viewGroup, false);
             // return as a view holder.
             return new ViewHolder(view);
         }
@@ -84,6 +92,7 @@ public class PlacesListItem {
             // set the values
             viewHolder.tvDate.setText(item.getDate());
             viewHolder.tvName.setText(item.getName());
+            viewHolder.tvGeoCode.setText(item.getGeoCode());
             viewHolder.imgIcon.setImageResource(R.drawable.img_location_64);
         }
 
@@ -104,12 +113,14 @@ public class PlacesListItem {
         public class ViewHolder extends RecyclerView.ViewHolder {
             TextView tvDate;
             TextView tvName;
+            TextView tvGeoCode;
             ImageView imgIcon;
 
             public ViewHolder(@NonNull View itemView) {
                 super(itemView); // do not remove this
                 tvDate = itemView.findViewById(R.id.tvDate);
                 tvName = itemView.findViewById(R.id.tvName);
+                tvGeoCode = itemView.findViewById(R.id.tvGeoCode);
                 imgIcon = itemView.findViewById(R.id.imgIcon);
             }
         }

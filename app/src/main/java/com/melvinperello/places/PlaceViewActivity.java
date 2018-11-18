@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -15,6 +14,7 @@ import com.melvinperello.places.domain.Place;
 import com.melvinperello.places.domain.PlacesListItem;
 import com.melvinperello.places.persistence.db.ApplicationDatabase;
 import com.melvinperello.places.ui.SearchToolbarFixer;
+import com.melvinperello.places.util.LocationTool;
 import com.melvinperello.places.util.ToastAdapter;
 
 import java.util.ArrayList;
@@ -105,7 +105,6 @@ public class PlaceViewActivity extends AppCompatActivity implements MenuItem.OnA
 
     @Override
     public boolean onMenuItemActionExpand(MenuItem item) {
-        ToastAdapter.show(getApplicationContext(), "Show");
         return true;
     }
 
@@ -145,7 +144,16 @@ public class PlaceViewActivity extends AppCompatActivity implements MenuItem.OnA
             for (Place place : items) {
                 PlacesListItem displayItem = new PlacesListItem();
                 displayItem.setName(place.getName());
-                displayItem.setDate(String.valueOf(place.getCreatedAt()));
+                String displayGeoCode = place.getRevGeoCode() == null ? "No Geo Code" : place.getRevGeoCode();
+
+                displayItem.setGeoCode(displayGeoCode);
+                long displayTime = place.getCreatedAt();
+
+                if (place.getUpdatedAt() != 0) {
+                    displayTime = place.getUpdatedAt();
+                }
+
+                displayItem.setDate(LocationTool.getLocationTimeInString("MMMMMMMMM dd, yyyy hh:mm a", displayTime));
                 displayItems.add(displayItem);
             }
             return displayItems;
@@ -155,7 +163,6 @@ public class PlaceViewActivity extends AppCompatActivity implements MenuItem.OnA
         protected void onPostExecute(List<PlacesListItem> placesListItems) {
             placesList.clear();
             placesList.addAll(placesListItems);
-            Log.i("PlaceViewActivity", "Items Received: " + placesListItems.size());
             placesAdapter.notifyDataSetChanged();
         }
     }

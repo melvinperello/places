@@ -2,6 +2,7 @@ package com.melvinperello.places;
 
 import android.content.DialogInterface;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +17,7 @@ import com.melvinperello.places.feature.location.LocationAware;
 import com.melvinperello.places.interfaces.StartingState;
 import com.melvinperello.places.persistence.db.ApplicationDatabase;
 import com.melvinperello.places.util.LocationTool;
+import com.melvinperello.places.util.ToastAdapter;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -175,21 +177,30 @@ public class PlaceNewActivity extends AppCompatActivity implements
         place.setNote(edtNotes.getText().toString().trim());
         place.setLatitude(mLocationObtained.getLatitude());
         place.setLongitude(mLocationObtained.getLongitude());
+        place.setSource(Place.Source.LOCAL.name());
         place.setCreatedAt(mLocationAtomicTime);
 
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                ApplicationDatabase database = ApplicationDatabase
-                        .build(getApplicationContext());
-                database.placeDao().insert(place);
-                database.close();
-                PlaceNewActivity.this.finish();
-            }
-        }).start();
+        new DataPlaceInsert().execute(place);
+    }
 
 
+    private class DataPlaceInsert extends AsyncTask<Place, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Place... places) {
+            ApplicationDatabase database = ApplicationDatabase
+                    .build(getApplicationContext());
+            database.placeDao().insert(places[0]);
+            database.close();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            PlaceNewActivity.this.finish();
+            ToastAdapter.show(getApplicationContext(), "Successfully Added", ToastAdapter.SUCCESS);
+        }
     }
 
     @Override
