@@ -5,7 +5,7 @@ import android.location.Location;
 /**
  * Interface for location services.
  */
-public interface LocationAware {
+public interface LocationClient {
 
     /**
      * starts location service. inquires location.

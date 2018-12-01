@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.melvinperello.places.TempTravelNew;
-import com.melvinperello.places.feature.location.LocationAware;
+import com.melvinperello.places.feature.location.LocationClient;
 import com.melvinperello.places.util.ToastAdapter;
 
 /**
@@ -18,10 +18,10 @@ public class LocationServiceController {
     /**
      * Dependency.
      */
-    private LocationAware mLocationAwarenessClient;
+    private LocationClient mLocationAwarenessClient;
 
 
-    public void setLocationAwarenessClient(LocationAware mLocationAwarenessClient) {
+    public void setLocationAwarenessClient(LocationClient mLocationAwarenessClient) {
         this.mLocationAwarenessClient = mLocationAwarenessClient;
     }
 

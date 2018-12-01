@@ -13,7 +13,7 @@ import android.widget.TextView;
 import com.melvinperello.places.annotation.RequiredComponent;
 import com.melvinperello.places.domain.Place;
 import com.melvinperello.places.feature.location.GoogleFusedLocationClient;
-import com.melvinperello.places.feature.location.LocationAware;
+import com.melvinperello.places.feature.location.LocationClient;
 import com.melvinperello.places.interfaces.StartingState;
 import com.melvinperello.places.persistence.db.ApplicationDatabase;
 import com.melvinperello.places.util.LocationTool;
@@ -25,7 +25,7 @@ import butterknife.OnClick;
 import butterknife.OnTextChanged;
 
 public class PlaceNewActivity extends AppCompatActivity implements
-        LocationAware.OnLocationObtained
+        LocationClient.OnLocationObtained
         , StartingState {
 
     //----------------------------------------------------------------------------------------------
@@ -59,7 +59,7 @@ public class PlaceNewActivity extends AppCompatActivity implements
     // Members
     //----------------------------------------------------------------------------------------------
     @RequiredComponent
-    private LocationAware mLocationAwarenessClient;
+    private LocationClient mLocationAwarenessClient;
     @RequiredComponent
     private PlaceNewActivityController mController;
 

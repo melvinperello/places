@@ -15,7 +15,7 @@ import com.google.android.gms.location.LocationServices;
 /**
  * Google Fused Location Client.
  */
-public class GoogleFusedLocationClient implements LocationAware {
+public class GoogleFusedLocationClient implements LocationClient {
 
     private long intervalInternal = 5000;
     private long intervalExternal = 3000;

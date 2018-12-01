@@ -16,7 +16,6 @@
         android:theme="@style/AppTheme"
         tools:replace="android:icon">
 
-
         <!-- Service -->
         <service android:name=".service.PlacesMainService" />
 
@@ -31,7 +30,7 @@
         <activity android:name=".PlacesViewStream" />
         <activity android:name=".PlacesMarkerNew" />
         <activity android:name=".TempTravelInfo" />
-        <!-- Home Activity-->
+        <!-- Home Activity -->
         <activity
             android:name=".HomeActivity"
             android:launchMode="singleTop"
@@ -49,11 +48,10 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
-
         <activity android:name=".AboutActivity" />
         <activity android:name=".PlaceNewActivity" />
 
-        <!-- Place Activity-->
+        <!-- Place Activity -->
         <activity
             android:name=".PlaceViewActivity"
             android:launchMode="singleTop"
@@ -61,11 +59,12 @@
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
+
             <meta-data
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
-
+        <activity android:name=".PlaceNewShowMapActivity"></activity>
     </application>
 
 </manifest>
